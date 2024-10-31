@@ -1,6 +1,5 @@
 'use client' 
 
-import Image from "next/image";
 import React, { useState } from 'react';
 import Scroller from './components/Scroller';
 
@@ -25,7 +24,7 @@ export default function Home() {
       <div className="lg:flex-col flex w-full">
         <div className="flex-col w-full p-6 text-center justify-center">
           <h1 className="text-[5rem] font-bold text-white leading-none my-12 text-shadow-lg">
-            <span className="ps-6 me-52">it's</span>
+            <span className="ps-6 me-52">it&#39;s</span>
             <br/>
             <span className="text-[7rem]">Giving</span>
           </h1>

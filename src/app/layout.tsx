@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
 import './styles/custom-tailwind.css'; /* Import custom utilities */
 import Head from 'next/head';
+import { Inter } from 'next/font/google';
 
+
+// Import multiple font weights here
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'], // Add only the weights you want
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -16,20 +23,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-    <>
-      <Head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </Head>
+    <html lang="en" className="inter.variable">
       <body
-        className={'antialiased'}
+        className={'font-sans'}
       >
         {children}
       </body>
-    </>
     </html>
   );
 }
