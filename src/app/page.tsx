@@ -27,6 +27,7 @@ export default function Home() {
         setMessage(data.error || 'Failed to subscribe');
       }
     } catch (error) {
+      console.error(error)
       setMessage('An error occurred. Please try again.');
     }
   };
@@ -53,7 +54,7 @@ export default function Home() {
 
       <div className="lg:flex-col flex w-full justify-center px-10">
 
-        
+        {message}
           <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4 py-24">
             <input
               type="email"
