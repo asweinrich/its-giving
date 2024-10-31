@@ -6,14 +6,29 @@ import Scroller from './components/Scroller';
 
 export default function Home() {
   const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [message, setMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here, you could integrate with a backend API or third-party email service
-    console.log(`Email submitted: ${email}`);
-    setSubmitted(true); // Update state to indicate submission
-    setEmail(''); // Clear the form field
+    setMessage(''); // Reset any existing message
+
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setMessage(data.message); // Success message
+        setEmail(''); // Clear the form
+      } else {
+        setMessage(data.error || 'Failed to subscribe');
+      }
+    } catch (error) {
+      setMessage('An error occurred. Please try again.');
+    }
   };
 
   return (
@@ -38,9 +53,7 @@ export default function Home() {
 
       <div className="lg:flex-col flex w-full justify-center px-10">
 
-        {submitted ? (
-          <p className="text-white text-h4 text-center text-shadow-lg font-medium">Thanks for signing up!</p>
-        ) : (
+        
           <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4 py-24">
             <input
               type="email"
@@ -57,7 +70,7 @@ export default function Home() {
               Sign Up for Updates
             </button>
           </form>
-        )}
+        
       </div>
     </div>
     </>
