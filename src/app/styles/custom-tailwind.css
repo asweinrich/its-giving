@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* styles/custom-tailwind.css */
+@layer utilities {
+  .hover-soft {
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+  .hover-soft:hover {
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  }
+  .hover-primary {
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+  .hover-primary:hover {
+    background-color: #2E5C3D; /* Dark green for hover */
+    color: #EDE6D5; /* Light contrast color */
+  }
+  .hover-accent {
+    transition: background-color 150ms ease;
+  }
+  .hover-accent:hover {
+    background-color: #D9BCA4; /* muted clay */
+  }
+}
