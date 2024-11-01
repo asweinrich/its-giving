@@ -7,6 +7,7 @@ import Scroller from './components/Scroller';
 export default function Home() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [subscribed, setSubsribed] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +23,7 @@ export default function Home() {
       const data = await res.json();
       if (res.ok) {
         setMessage(data.message); // Success message
+        setSubsribed(true)
         setEmail(''); // Clear the form
       } else {
         setMessage(data.error || 'Failed to subscribe');
@@ -54,7 +56,12 @@ export default function Home() {
 
       <div className="lg:flex-col flex w-full justify-center px-10">
 
-        {message}
+        {message &&
+          <div className="mx-auto">
+            {message}
+          </div>
+        }
+          {!subscribed && 
           <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4 py-24">
             <input
               type="email"
@@ -71,7 +78,7 @@ export default function Home() {
               Sign Up for Updates
             </button>
           </form>
-        
+          }
       </div>
     </div>
     </>
