@@ -1,0 +1,248 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int     @id @default(autoincrement())
+  email           String? @unique // Optional if the user signs up only with phone or OAuth
+  phoneNumber     String? @unique // Optional for cases where users sign up with email or OAuth
+  passwordHash    String? // Required for email/password logins only
+  oauthProvider   String? // For storing OAuth provider (e.g., "google", "facebook")
+  oauthProviderId String? // ID provided by the OAuth provider (e.g., Google user ID)
+  authMethod      String  @default("email") // Track auth method (e.g., email, oauth, phone)
+
+  name     String? // User's display name
+  bio      String? // Short bio or description
+  imageUrl String? // URL to profile image
+
+  roles Role[] // Array of roles (e.g., ["USER", "ADMIN"])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  fundraisers Fundraiser[] // One-to-many relation to Fundraiser
+  donations   Donation[] // One-to-many relation to Donation
+
+  events             Event[] // Opposite relation for events triggered by this user
+  auditLogs          AuditLog[] // Opposite relation for actions logged by this user
+  comments           Comment[] // Opposite relation for comments made by this user
+  recurringDonations RecurringDonation[] // Opposite relation for user’s recurring donations
+}
+
+enum Role {
+  USER
+  ADMIN
+  NONPROFIT_MANAGER
+  DONOR
+}
+
+model Account {
+  id                 Int       @id @default(autoincrement())
+  userId             Int
+  provider           String
+  providerAccountId  String
+  type               String
+  access_token       String?   // Optional, depends on provider
+  expires_at         Int?      // Optional, depends on provider
+
+  user               User      @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+}
+
+
+model Nonprofit {
+  id           Int     @id @default(autoincrement())
+  name         String
+  description  String?
+  category     String?
+  websiteUrl   String?
+  imageUrl     String?
+  contactEmail String? //For nonprofit verification, must match legitimate website url   
+
+  // Regulatory ID Information
+  regulatoryId     String @unique // EIN for U.S., other IDs for international nonprofits
+  regulatoryIdType String // e.g., EIN, Charity Number
+  countryCode      String // ISO country code (e.g., US, GB)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  fundraisers Fundraiser[]
+  donations   Donation[]
+
+  detail             NonprofitDetail?
+  events             Event[] // Opposite relation for events associated with this nonprofit
+  payouts            Payout[] // Opposite relation for payouts to this nonprofit
+  recurringDonations RecurringDonation[] // Opposite relation for recurring donations to this nonprofit
+}
+
+model NonprofitDetail {
+  id             Int     @id @default(autoincrement())
+  mission        String? // Mission statement or main goals
+  history        String? // Background information
+  impactStats    Json? // JSON to store structured data like impact numbers
+  testimonials   Json? // JSON to store an array of testimonials
+  additionalInfo Json? // Catch-all for other content like FAQs, programs, etc.
+
+  // Relations
+  nonprofitId Int       @unique
+  nonprofit   Nonprofit @relation(fields: [nonprofitId], references: [id])
+}
+
+model Fundraiser {
+  id            Int       @id @default(autoincrement())
+  title         String // Fundraiser title
+  description   String? // Detailed description of the fundraiser
+  goalAmount    Float // Financial goal for the fundraiser
+  currentAmount Float     @default(0) // Current total amount raised
+  startDate     DateTime  @default(now())
+  endDate       DateTime? // Optional end date
+  isActive      Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  nonprofitId Int
+  nonprofit   Nonprofit @relation(fields: [nonprofitId], references: [id])
+
+  creatorId Int // Primary creator (admin) of the fundraiser
+  creator   User @relation(fields: [creatorId], references: [id])
+
+  coHosts Int[] // Array of user IDs for approved co-hosts
+
+  donations Donation[] // One-to-many relation with Donation
+  events    Event[] // Opposite relation for events related to this fundraiser
+  comments  Comment[] // Opposite relation for comments on this fundraiser
+}
+
+model Donation {
+  id       Int    @id @default(autoincrement())
+  amount   Float // Donation amount
+  currency String @default("USD") // Currency code (e.g., USD, EUR)
+
+  paymentIntentId String @unique // Stripe payment intent ID
+  status          String @default("pending") // Payment status (e.g., succeeded, pending)
+
+  description String? // Optional description or note from the donor
+  dedication  String? // Optional dedication text (e.g., "In honor of...")
+
+  anonymous     Boolean @default(false) // Indicates if donation is anonymous
+  paymentMethod String? // Method of payment for donor reference (e.g., Credit Card)
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId Int? // Foreign key to User (optional for anonymous donations)
+  user   User? @relation(fields: [userId], references: [id])
+
+  fundraiserId Int? // Foreign key to Fundraiser (nullable for direct nonprofit donations)
+  fundraiser   Fundraiser? @relation(fields: [fundraiserId], references: [id])
+
+  nonprofitId Int // Foreign key to Nonprofit
+  nonprofit   Nonprofit @relation(fields: [nonprofitId], references: [id])
+
+  events Event[] // Opposite relation for events related to this donation
+}
+
+model Event {
+  id Int @id @default(autoincrement())
+
+  type      EventType // Type of event (e.g., donation, new fundraiser)
+  content   String // Main text content of the event
+  timestamp DateTime  @default(now()) // Time the event occurred
+
+  // Optional Foreign Key Relationships
+  userId Int? // User who triggered the event
+  user   User? @relation(fields: [userId], references: [id])
+
+  nonprofitId Int? // Associated nonprofit (if applicable)
+  nonprofit   Nonprofit? @relation(fields: [nonprofitId], references: [id])
+
+  fundraiserId Int? // Associated fundraiser (if applicable)
+  fundraiser   Fundraiser? @relation(fields: [fundraiserId], references: [id])
+
+  donationId Int? // Associated donation (if applicable)
+  donation   Donation? @relation(fields: [donationId], references: [id])
+}
+
+enum EventType {
+  NEW_FUNDRAISER // When a new fundraiser is created
+  DONATION // When a donation is made
+  NEW_NONPROFIT // When a new nonprofit is added
+  USER_JOINED // When a new user joins (optional, if desired for engagement)
+  FUNDRAISER_COMPLETED // When a fundraiser reaches its goal or ends
+}
+
+model AuditLog {
+  id Int @id @default(autoincrement())
+
+  userId Int? // The user who performed the action
+  user   User? @relation(fields: [userId], references: [id])
+
+  action    String // Action type or description (e.g., "created fundraiser", "updated profile")
+  details   Json? // Additional data (e.g., changed fields or action context)
+  timestamp DateTime @default(now()) // When the action occurred
+}
+
+model Comment {
+  id Int @id @default(autoincrement())
+
+  userId Int // The user who made the comment
+  user   User @relation(fields: [userId], references: [id])
+
+  fundraiserId Int // Fundraiser that the comment is associated with
+  fundraiser   Fundraiser @relation(fields: [fundraiserId], references: [id])
+
+  content   String // Text content of the comment
+  createdAt DateTime @default(now()) // Timestamp for when the comment was made
+  updatedAt DateTime @updatedAt // Timestamp for edits to the comment
+}
+
+model Payout {
+  id Int @id @default(autoincrement())
+
+  nonprofitId Int // Nonprofit receiving the payout
+  nonprofit   Nonprofit @relation(fields: [nonprofitId], references: [id])
+
+  amount        Float // Payout amount
+  status        String  @default("pending") // Status (e.g., pending, completed, failed)
+  transactionId String? // Transaction ID from the payout processor (optional)
+
+  createdAt   DateTime  @default(now()) // When the payout was created
+  completedAt DateTime? // When the payout was completed (if applicable)
+}
+
+model RecurringDonation {
+  id Int @id @default(autoincrement())
+
+  userId Int // User making the recurring donation
+  user   User @relation(fields: [userId], references: [id])
+
+  nonprofitId Int // Nonprofit receiving the recurring donation
+  nonprofit   Nonprofit @relation(fields: [nonprofitId], references: [id])
+
+  amount               Float // Donation amount per interval
+  currency             String  @default("USD") // Currency code
+  interval             String // Interval type (e.g., "monthly", "annually")
+  status               String  @default("active") // Status (e.g., active, canceled)
+  stripeSubscriptionId String? // Subscription ID from Stripe (optional)
+
+  createdAt        DateTime  @default(now()) // When the recurring donation started
+  nextDonationDate DateTime? // Date of the next scheduled donation
+}
+
