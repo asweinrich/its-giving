@@ -4,6 +4,7 @@ import './styles/custom-tailwind.css'; /* Import custom utilities */
 import { Inter } from 'next/font/google';
 
 
+
 // Import multiple font weights here
 const inter = Inter({
   subsets: ['latin'],
@@ -23,6 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+
       <body
         className={inter.variable+' font-sans'}
       >
