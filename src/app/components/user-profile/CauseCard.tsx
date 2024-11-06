@@ -8,7 +8,7 @@ type CauseCardProps = {
   imageUrl?: string;
 };
 
-const CauseCard: React.FC<CauseCardProps> = ({ title, description, imageUrl }) => {
+const CauseCard: React.FC<CauseCardProps> = ({ title, imageUrl }) => {
   return (
     <div className="border rounded-lg py-2 px-4 shadow-md bg-white flex items-center space-x-4">
       {imageUrl && (
