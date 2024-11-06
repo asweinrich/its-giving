@@ -1,7 +1,7 @@
 // components/UserFundraisers.tsx
 
 import React from 'react';
-import Image from 'next/Image';
+import Image from 'next/image';
 
 type CauseCardProps = {
   title: string;
