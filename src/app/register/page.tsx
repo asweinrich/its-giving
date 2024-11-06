@@ -22,7 +22,7 @@ const SignUpPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-primary-light to-primary-dark relative">
-      
+
       <div className="flex flex-col lg:flex-row justify-center items-center text-white rounded-lg w-full mx-4 lg:mx-0 ">
         
         
@@ -66,7 +66,7 @@ const SignUpPage: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full bg-primaryGreen hover:bg-green-600 text-white font-semibold py-2 rounded-md transition duration-200"
+              className="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-2 rounded-md transition duration-200"
             >
               Start Your Free Trial
             </button>

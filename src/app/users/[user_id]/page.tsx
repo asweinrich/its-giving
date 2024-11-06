@@ -7,9 +7,11 @@ import NavBar from '../../components/NavBar';
 
 // Mock async function to fetch user data
 async function fetchUserData(username: string) {
+
   // Replace this with your actual data fetching logic
   return {
     imageUrl: '/user.jpg',
+    username: username,
     name: 'Jane Doe',
     bio: 'Passionate about social causes and community development.',
     socialLinks: {
@@ -20,8 +22,8 @@ async function fetchUserData(username: string) {
       website: 'https://janedoe.com',
     },
     causes: [
-      { title: 'Clean Water Initiative', description: 'Bringing clean water to communities.', imageUrl: '/causes/clean-water-initiative.svg' },
-      { title: 'Wildlife Preservation', description: 'Protecting endangered species.', imageUrl: '/causes/hippo.svg' },
+      { title: 'Clean Water Initiative', imageUrl: '/causes/clean-water-initiative.svg' },
+      { title: 'Wildlife Preservation', imageUrl: '/causes/hippo.svg' },
     ],
     activities: [
       { id: 1, type: 'donation', date: '2024-01-10', description: 'Donated to Clean Water Initiative' },

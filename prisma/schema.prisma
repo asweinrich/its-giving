@@ -23,6 +23,7 @@ model User {
   authMethod      String  @default("email") // Track auth method (e.g., email, oauth, phone)
 
   name     String? // User's display name
+  username String? @unique
   bio      String? // Short bio or description
   imageUrl String? // URL to profile image
 

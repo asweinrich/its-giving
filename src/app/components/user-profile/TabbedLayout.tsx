@@ -47,13 +47,7 @@ const TabbedLayout: React.FC<TabbedLayoutProps> = ({ causes, activities, fundrai
         return (
           <div className="space-y-4">
             {fundraisers.map((fundraiser) => (
-              <div key={fundraiser.id} className="p-4 border rounded-lg shadow-sm bg-white">
-                <h3 className="text-lg font-semibold text-gray-800">{fundraiser.title}</h3>
-                <p className="text-gray-600 mb-2">{fundraiser.description}</p>
-                <p className="text-sm text-gray-500">
-                  Raised ${fundraiser.currentAmount} of ${fundraiser.goalAmount}
-                </p>
-              </div>
+              <UserFundraisers key={index} {...fundraiser} />
             ))}
           </div>
         );
