@@ -38,13 +38,31 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       session.user.id = token.sub;
       session.user.roles = token.roles;
+      session.user.emailVerified = token.emailVerified; // Add email verification status to session
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
         token.roles = user.roles;
+        token.emailVerified = user.emailVerified; // Add email verification status to token
       }
       return token;
+    },
+    async signIn({ user, account }) {
+      if (account.provider === 'google') {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: user.email },
+        });
+
+        // If the Google user doesn't have a username, redirect to setup
+        if (dbUser && !dbUser.username) {
+          return `/dashboard/${dbUser.id}/setup`; // Redirect new Google users to the setup page
+        }
+      } else if (!user.emailVerified) {
+        // For email/password users, ensure email is verified before sign-in
+        return `/dashboard/${user.id}/setup`; // Prevent full access sign-in if email not verified
+      }
+      return true; // Proceed with sign-in if all is well
     },
   },
 };

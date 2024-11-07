@@ -3,12 +3,18 @@
 // app/signup/page.tsx
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
+
 
 const SignUpPage: React.FC = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,8 +22,42 @@ const SignUpPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Submit form data to the backend
-    console.log('Form submitted:', formData);
+    
+    try {
+      // Make a POST request to your registration API route
+      const response = await fetch('/api/users/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Redirect to setup page on successful registration
+        const signInResponse = await signIn('credentials', {
+          redirect: false,
+          email: formData.email,
+          password: formData.password,
+        });
+
+        if (signInResponse?.ok) {
+          // Redirect to setup page if sign-in succeeds
+          router.push(`/dashboard/${data.userId}/setup`);
+        } else {
+          // Handle sign-in error (optional)
+          setError('Sign-in failed after registration. Please try logging in.');
+        }
+      } else {
+        // Handle error if registration fails
+        setError(data.message || 'Registration failed, please try again.');
+      }
+    } catch (err) {
+      console.error('Error during registration:', err);
+      setError('An error occurred, please try again.');
+    }
   };
 
   return (

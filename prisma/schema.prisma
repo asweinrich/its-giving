@@ -22,6 +22,8 @@ model User {
   oauthProviderId String? // ID provided by the OAuth provider (e.g., Google user ID)
   authMethod      String  @default("email") // Track auth method (e.g., email, oauth, phone)
 
+  emailVerified   Boolean @default(false)
+  verificationToken String? // Unique token for email verification
   name     String? // User's display name
   username String? @unique
   bio      String? // Short bio or description
