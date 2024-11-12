@@ -1,42 +1,15 @@
 'use client' 
 
 import React, { useState } from 'react';
-import Scroller from './components/Scroller';
+import NavBar from './components/NavBar'
 
 
 export default function Home() {
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [subscribed, setSubsribed] = useState(false)
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setMessage(''); // Reset any existing message
-
-    try {
-      const res = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setMessage(data.message); // Success message
-        setSubsribed(true)
-        setEmail(''); // Clear the form
-      } else {
-        setMessage(data.error || 'Failed to subscribe');
-      }
-    } catch (error) {
-      console.error(error)
-      setMessage('An error occurred. Please try again.');
-    }
-  };
+  
 
   return (
     <>
-    <Scroller />
+    <NavBar />
     <div className="min-h-screen bg-gradient-to-tr from-primary-light to-primary-dark lg:flex flex-column p-0">
       
       <div className="lg:flex-col flex w-full">
@@ -53,33 +26,6 @@ export default function Home() {
 
       </div>
 
-
-      <div className="lg:flex-col flex w-full justify-center px-10">
-
-        {message &&
-          <div className="mx-auto">
-            {message}
-          </div>
-        }
-          {!subscribed && 
-          <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-4 py-24">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="Enter your email"
-              className="w-80 p-3 mb-4 text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-dark dark:focus:ring-primary-dark"
-            />
-            <button
-              type="submit"
-              className="w-80 bg-primary-light dark:bg-primary-dark text-white text-h4 text-shadow font-bold py-3 px-4 rounded-xl hover-primary hover-soft shadow-soft transition"
-            >
-              Sign Up for Updates
-            </button>
-          </form>
-          }
-      </div>
     </div>
     </>
   );

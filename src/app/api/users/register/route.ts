@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   const { email, password } = await req.json();
 
   // Validate required fields
-  if (!email || !password+) {
+  if (!email || !password ) {
     return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
   }
 

@@ -31,6 +31,9 @@ model User {
 
   roles Role[] // Array of roles (e.g., ["USER", "ADMIN"])
 
+  // Define the relationship to Account
+  accounts  Account[] // A user can have multiple accounts (e.g., multiple OAuth providers)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
