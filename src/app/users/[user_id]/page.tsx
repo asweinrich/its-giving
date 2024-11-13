@@ -3,7 +3,6 @@
 
 import UserProfile from '../../components/user-profile/UserProfile';
 import TabbedLayout from '../../components/user-profile/TabbedLayout';
-import NavBar from '../../components/NavBar';
 
 // Mock async function to fetch user data
 async function fetchUserData(username: string) {
@@ -45,8 +44,6 @@ export default async function UserPage({ params }: UserPageProps) {
 
   return (
     <div className="w-full min-h-screen bg-accent-sand">
-      {/* Navbar */}
-      <NavBar />
       <div className="px-4 py-4 max-w-6xl mx-auto">
 
       {/* User Profile */}
