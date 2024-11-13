@@ -1,39 +1,22 @@
 import nodemailer from 'nodemailer';
 import { google } from 'googleapis';
 
-const OAuth2 = google.auth.OAuth2;
-
-// Initialize OAuth2 client with environment variables
-const oauth2Client = new OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  'https://developers.google.com/oauthplayground' // Redirect URI used when generating the refresh token
-);
-
-oauth2Client.setCredentials({
-  refresh_token: process.env.GMAIL_REFRESH_TOKEN,
-});
 
 export async function sendVerificationEmail(to: string, token: string, userId: string) {
   try {
     // Generate access token
-    const accessToken = await oauth2Client.getAccessToken();
 
     // Set up Nodemailer with Gmail OAuth2
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        type: 'OAuth2',
-        user: process.env.VERIFICATION_USER, // Primary account email
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-        accessToken: accessToken.token, // Access token generated from refresh token
+        user: process.env.NEXT_PUBLIC_VERIFICATION_USER,
+        pass: 'ucsg awfb nxfo cibc',
       },
     });
 
     // Create the verification URL
-    const verificationUrl = `https://itsgiving.org/api/verify-email?token=${token}`;
+    const verificationUrl = `http://localhost:3000/api/verify-email?token=${token}`;
 
     // Define email options
     const mailOptions = {

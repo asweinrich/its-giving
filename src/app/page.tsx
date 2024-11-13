@@ -1,7 +1,6 @@
 'use client' 
 
 import React, { useState } from 'react';
-import NavBar from './components/NavBar'
 
 
 export default function Home() {
@@ -9,7 +8,6 @@ export default function Home() {
 
   return (
     <>
-    <NavBar />
     <div className="min-h-screen bg-gradient-to-tr from-primary-light to-primary-dark lg:flex flex-column p-0">
       
       <div className="lg:flex-col flex w-full">

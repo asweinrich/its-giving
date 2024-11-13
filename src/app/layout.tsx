@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import './styles/custom-tailwind.css'; /* Import custom utilities */
 import { Inter } from 'next/font/google';
+import NavBar from './components/NavBar';
 
 
 
@@ -28,6 +29,7 @@ export default function RootLayout({
       <body
         className={inter.variable+' font-sans'}
       >
+        <NavBar />
         {children}
       </body>
     </html>

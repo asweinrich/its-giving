@@ -1,17 +1,18 @@
 // testEmail.js
+require('dotenv').config();
 
 const nodemailer = require('nodemailer');
 const { google } = require('googleapis');
 
+
 const OAuth2 = google.auth.OAuth2;
 
 // Load environment variables
-require('dotenv').config();
 
 
 const oauth2Client = new OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
   'https://developers.google.com/oauthplayground' // Redirect URI
 );
 
@@ -20,25 +21,23 @@ oauth2Client.setCredentials({
 });
 
 async function testSendEmail() { 
+
   console.log('variable: ', process.env.NEXT_PUBLIC_CONVERTKIT_API_KEY)
+
   try {
     const accessToken = await oauth2Client.getAccessToken();
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        type: 'OAuth2',
-        user: process.env.VERIFICATION_USER,
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        refreshToken: process.env.NEXT_PUBLIC_GMAIL_REFRESH_TOKEN,
-        accessToken: accessToken.token,
+        user: process.env.NEXT_PUBLIC_VERIFICATION_USER,
+        pass: 'ucsg awfb nxfo cibc',
       },
     });
 
     const mailOptions = {
-      from: `"It’s Giving" <${process.env.VERIFICATION_USER}>`,
-      to: process.env.VERIFICATION_USER, // Test email to yourself
+      from: `"It’s Giving Verification" <verify@itsgiving.org>`,
+      to: process.env.NEXT_PUBLIC_VERIFICATION_USER, // Test email to yourself
       subject: 'Test Email',
       text: 'This is a test email from the Nodemailer setup.',
     };

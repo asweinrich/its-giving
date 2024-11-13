@@ -22,5 +22,5 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  return NextResponse.redirect(`/dashboard/${user.id}/setup`);
+  return NextResponse.redirect(`http://localhost:3000/dashboard/${user.id}/setup`);
 }

@@ -39,7 +39,6 @@ export async function POST(req: NextRequest) {
     // Send the verification email
     await sendVerificationEmail(email, verificationToken, newUser.id);
 
-
     // Return user ID without redirecting
     return NextResponse.json({ userId: newUser.id, message: 'User registered successfully' }, { status: 201 });
 

@@ -15,6 +15,7 @@ const SignUpPage: React.FC = () => {
   });
 
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,6 +23,7 @@ const SignUpPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     
     try {
       // Make a POST request to your registration API route
@@ -35,17 +37,27 @@ const SignUpPage: React.FC = () => {
 
       const data = await response.json();
 
+      console.log(data)
+      console.log(response.ok)
+
       if (response.ok) {
         // Redirect to setup page on successful registration
-        const signInResponse = await signIn('credentials', {
+        console.log('starting sign in response')
+        
+        console.log('Email:', formData.email);
+        console.log('Password:', formData.password);
+
+        const signInResponse = await signIn('Credentials', {
           redirect: false,
           email: formData.email,
           password: formData.password,
         });
 
+        console.log('sign in response: ', signInResponse, ': ', signInResponse?.ok)
+
         if (signInResponse?.ok) {
           // Redirect to setup page if sign-in succeeds
-          router.push(`/dashboard/${data.userId}/setup`);
+          console.log(`/dashboard/${data.userId}/setup`);
         } else {
           // Handle sign-in error (optional)
           setError('Sign-in failed after registration. Please try logging in.');
@@ -57,6 +69,8 @@ const SignUpPage: React.FC = () => {
     } catch (err) {
       console.error('Error during registration:', err);
       setError('An error occurred, please try again.');
+    } finally {
+      setLoading(false); // Reset loading state if needed (e.g., after error handling)
     }
   };
 
@@ -69,7 +83,7 @@ const SignUpPage: React.FC = () => {
         {/* Left Side Content */}
         <div className="p-8 lg:w-1/2 max-w-xl text-center lg:text-left lg:me-16">
           <h1 className="text-4xl font-bold mb-4">Try It’s Giving free for 30 days</h1>
-          <p className="text-lg mb-6">Discover the causes that matter to you. Start making a difference today!</p>
+          <p className="text-lg mb-6">Find your cause. Start making a difference today!</p>
         </div>
 
         {/* Right Side Form */}
@@ -106,9 +120,38 @@ const SignUpPage: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-2 rounded-md transition duration-200"
+              disabled={loading}
+              className={`w-full bg-primary text-white font-semibold py-2 rounded-md transition duration-200 ${
+                loading ? 'bg-primary-dark cursor-not-allowed' : 'hover:bg-primary-dark'
+              }`}
             >
-              Start Your Free Trial
+              {loading ? (
+                <div className="flex items-center justify-center">
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8H4z"
+                    ></path>
+                  </svg>
+                  <span className="ml-2">Registering...</span>
+                </div>
+              ) : (
+                'Register'
+              )}
             </button>
           </form>
 
