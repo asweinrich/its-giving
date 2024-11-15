@@ -29,7 +29,7 @@ export default function LoginPage() {
       if (response.ok) {
         setAuthenticated(true, { userId: data.user_id, email }); // Update AuthContext
         // Redirect to the dashboard after successful login
-        router.push(`/dashboard/${data.user_id}`);
+        router.push(`/dashboard`);
       } else {
         setError(data.error || "Login failed. Please check your credentials.");
       }

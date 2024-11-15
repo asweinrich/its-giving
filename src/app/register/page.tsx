@@ -57,7 +57,7 @@ const SignUpPage: React.FC = () => {
 
         if (signInResponse?.ok) {
           // Redirect to setup page if sign-in succeeds
-          console.log(`/dashboard/${data.userId}/setup`);
+          console.log(`/dashboard/setup`);
         } else {
           // Handle sign-in error (optional)
           setError('Sign-in failed after registration. Please try logging in.');
