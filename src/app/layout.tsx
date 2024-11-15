@@ -3,6 +3,8 @@ import "./globals.css";
 import './styles/custom-tailwind.css'; /* Import custom utilities */
 import { Inter } from 'next/font/google';
 import NavBar from './components/NavBar';
+import { AuthProvider } from "@/context/AuthContext"; // Import AuthProvider
+
 
 
 
@@ -29,8 +31,10 @@ export default function RootLayout({
       <body
         className={inter.variable+' font-sans'}
       >
-        <NavBar />
-        {children}
+        <AuthProvider>
+          <NavBar />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
