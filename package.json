@@ -20,7 +20,7 @@
     "googleapis": "^144.0.0",
     "jsonwebtoken": "^9.0.2",
     "maplibre-gl": "^4.7.1",
-    "next": "15.0.2",
+    "next": "^15.0.3",
     "next-auth": "^4.24.10",
     "nodemailer": "^6.9.16",
     "prisma": "^5.21.1",
