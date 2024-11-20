@@ -21,6 +21,10 @@ const SignUpPage: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  //use error for now
+  console.log(error)
+  console.log(router)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -57,7 +61,7 @@ const SignUpPage: React.FC = () => {
 
         if (signInResponse?.ok) {
           // Redirect to setup page if sign-in succeeds
-          console.log(`/dashboard/setup`);
+          router.push(`/dashboard/setup`);
         } else {
           // Handle sign-in error (optional)
           setError('Sign-in failed after registration. Please try logging in.');

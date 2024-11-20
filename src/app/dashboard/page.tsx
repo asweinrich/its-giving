@@ -16,6 +16,9 @@ export default function DashboardPage() {
   const { user } = useAuth(); // Assuming `useAuth` provides user data from session
   const [userId, setUserId] = useState(null);
 
+  //use for now
+  console.log(userId)
+
   useEffect(() => {
     // Assuming `user` contains `userId` from session/context
     if (user) {

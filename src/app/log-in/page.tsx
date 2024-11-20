@@ -33,7 +33,8 @@ export default function LoginPage() {
       } else {
         setError(data.error || "Login failed. Please check your credentials.");
       }
-    } catch (error) {
+    } catch (err) {
+      console.log(err)
       setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);
