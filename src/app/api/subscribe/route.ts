@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   const { email } = await request.json();
-  const apiKey = process.env.NEXT_PUBLIC_CONVERTKIT_API_KEY;
-  const formId = process.env.NEXT_PUBLIC_CONVERTKIT_FORM_ID;
+  const apiKey = process.env.CONVERTKIT_API_KEY;
+  const formId = process.env.CONVERTKIT_FORM_ID;
 
   if (!email || !apiKey || !formId) {
     return NextResponse.json({ error: 'Missing data' }, { status: 400 });
