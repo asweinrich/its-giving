@@ -1,8 +1,10 @@
 import nodemailer from 'nodemailer';
-import { google } from 'googleapis';
 
 
 export async function sendVerificationEmail(to: string, token: string, userId: string) {
+  //use userId for now:
+  console.log(userId)
+
   try {
     // Generate access token
 

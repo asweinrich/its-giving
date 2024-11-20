@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import NavBar from '../../../components/NavBar'
-import Image from "next/image";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
 // Phase 1: Name and Username Entry with Availability Check
@@ -89,7 +87,6 @@ function PhaseTwo({ formData, handleChange, handleSubmit, loading }) {
 export default function SetupPage() {
   const router = useRouter();
   const { user_id } = useParams();
-  const numericUserId = Number(user_id); 
   console.log(user_id)
 
   // State to track form data and progress

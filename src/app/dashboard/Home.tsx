@@ -11,7 +11,7 @@ export default function Home() {
     <div className="space-y-6">
       {/* Header */}
       <header className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Welcome Back, [User’s Name]</h1>
+        <h1 className="text-2xl font-bold">Welcome Back, [User&#39;s Name]</h1>
         <a href={`/users/${user_id}`}>
           <button className="py-2 px-4 bg-blue-600 rounded-lg text-white">View Profile</button>
         </a>
@@ -47,7 +47,7 @@ export default function Home() {
         <ul className="space-y-4">
           <li className="flex justify-between">
             <div>
-              <h4 className="text-lg">Children's Education Fund</h4>
+              <h4 className="text-lg">Children&#39;s Education Fund</h4>
               <p className="text-sm text-slate-400">Donated on Jan 15, 2023</p>
             </div>
             <p className="text-lg font-bold text-green-400">+$50</p>

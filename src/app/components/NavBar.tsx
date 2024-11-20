@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Bars3Icon } from "@heroicons/react/24/outline";
+import Link from 'next/link';
+
 
 export default function NavBar() {
   const router = useRouter();
@@ -36,9 +38,9 @@ export default function NavBar() {
       <div className="bg-slate-900 p-3 shadow-sm border-b border-black">
         <div className="px-3 mx-auto flex justify-between items-center">
           {/* Logo */}
-          <a href="/">
+          <Link href="/">
             <h1 className="text-white text-2xl font-bold leading-none pt-1.5">It&#39;s Giving</h1>
-          </a>
+          </Link>
 
           <div className="flex items-center space-x-4">
 

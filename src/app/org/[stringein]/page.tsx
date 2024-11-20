@@ -51,7 +51,7 @@ export default function OrgPage() {
     return <div className="text-center text-white">No data available for this EIN.</div>;
   }
 
-  const { name, city, state, subsection, ntee_code, total_revenue, ruling_date } = orgData.organization;
+  const { name, city, state, ntee_code, ruling_date } = orgData.organization;
 
   const getNteeDetails = (code) => {
     if (!code) return { category: "Unknown", subcategory: "Unknown" };

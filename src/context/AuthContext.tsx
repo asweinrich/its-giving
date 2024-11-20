@@ -14,6 +14,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<{ userId: string; email: string } | null>(null);
 
+  //use user for now: 
+  console.log(user) 
+  
   // Check login state once on load
    useEffect(() => {
     const verifyUser = async () => {
