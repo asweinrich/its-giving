@@ -64,7 +64,13 @@ const config: Config = {
         DEFAULT: '2px 2px 4px rgba(0, 0, 0, 0.25)',
         lg: '3px 3px 6px rgba(0, 0, 0, 0.3)',
         light: '1px 1px 2px rgba(255, 255, 255, 0.5)', // For light shadows
-      },    
+      },
+      scrollbar: {
+        hide: {
+          '&::-webkit-scrollbar': { display: 'none' },
+          '&': { '-ms-overflow-style': 'none', 'scrollbar-width': 'none' },
+        },
+      },
     },
   },
   variants: {
