@@ -56,11 +56,11 @@ export const authOptions: NextAuthOptions = {
 
         // If the Google user doesn't have a username, redirect to setup
         if (dbUser && !dbUser.username) {
-          return `/dashboard/${dbUser.id}/setup`; // Redirect new Google users to the setup page
+          return `/dashboard/setup`; // Redirect new Google users to the setup page
         }
       } else if (!user.emailVerified) {
         // For email/password users, ensure email is verified before sign-in
-        return `/dashboard/${user.id}/setup`; // Prevent full access sign-in if email not verified
+        return `/dashboard/setup`; // Prevent full access sign-in if email not verified
       }
       return true; // Proceed with sign-in if all is well
     },
