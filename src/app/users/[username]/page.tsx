@@ -32,9 +32,11 @@ async function fetchUserData(username: string) {
   };
 }
 
-type UserPageProps = {
-  params: { username: string };
-};
+interface UserPageProps {
+  params: {
+    username: string; // Matches the folder name
+  };
+}
 
 export default async function UserPage({ params }: UserPageProps) {
   const { username } = params;
