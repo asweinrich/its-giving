@@ -25,6 +25,8 @@ export default function DashboardPage() {
       // Ensure `user.userId` exists before setting it
       if (user.userId) {
         setUserId(user.userId);
+        console.log("User: ", User)
+        console.log("userId: ", userId)
       } else {
         console.warn("userId is missing in the user object:", user);
       }
@@ -33,6 +35,8 @@ export default function DashboardPage() {
       // Optionally redirect to a login page or show a message
     }
   }, [user]);
+
+
 
   const renderContent = () => {
     switch (activeSection) {
