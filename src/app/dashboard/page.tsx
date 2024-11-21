@@ -1,30 +1,36 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Sidebar from './Sidebar';
-import Home from './Home';
-import Donations from './Donations';
-import Causes from './Causes';
-import Fundraisers from './Fundraisers';
-import Account from './Account';
-import Settings from './Settings';
+import Sidebar from "./Sidebar";
+import Home from "./Home";
+import Donations from "./Donations";
+import Causes from "./Causes";
+import Fundraisers from "./Fundraisers";
+import Account from "./Account";
+import Settings from "./Settings";
 import { useAuth } from "@/context/AuthContext"; // Assuming you have an AuthContext
 
+interface User {
+  userId: string; // Ensure this matches your backend structure
+  email: string;
+}
 
 export default function DashboardPage() {
   const [activeSection, setActiveSection] = useState("Home");
-  const { user } = useAuth(); // Assuming `useAuth` provides user data from session
-  const [userId, setUserId] = useState(null);
-
-  //use for now
-  console.log(userId)
+  const { user } = useAuth(); // Assuming `useAuth` provides user data from session/context
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Assuming `user` contains `userId` from session/context
     if (user) {
-      setUserId(user.id);
+      // Ensure `user.userId` exists before setting it
+      if (user.userId) {
+        setUserId(user.userId);
+      } else {
+        console.warn("userId is missing in the user object:", user);
+      }
     } else {
-      // Handle case where user is not authenticated (redirect or show message)
+      console.warn("User is not authenticated. Redirect or handle appropriately.");
+      // Optionally redirect to a login page or show a message
     }
   }, [user]);
 
