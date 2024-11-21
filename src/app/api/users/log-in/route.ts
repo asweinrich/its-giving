@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     // Find the user in the database
     const user = await prisma.user.findUnique({ where: { email } });
 
-    if (!user) {
+    if (!user || !user.passwordHash) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
