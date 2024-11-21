@@ -1,8 +1,6 @@
 
 // app/user/[username]/page.tsx
 
-import UserProfile from '../../components/user-profile/UserProfile';
-import TabbedLayout from '../../components/user-profile/TabbedLayout';
 
 // Mock async function to fetch user data
 async function fetchUserData(username: string) {
@@ -48,16 +46,12 @@ export default async function UserPage(props: { params: UserPageProps}) {
 
       {/* User Profile */}
       <div className="p-6 md:flex md:space-x-8">
-        <UserProfile {...userData} />
+        user profile
       </div>
 
       {/* Conditional Content for Public Profile */}
       {userData.isPublic && (
-        <TabbedLayout
-          causes={userData.causes}
-          activities={userData.activities}
-          fundraisers={userData.fundraisers}
-        />
+        <div className="">public data</div>
       )}
       </div>
     </div>
