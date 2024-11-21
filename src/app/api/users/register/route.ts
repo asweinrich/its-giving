@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import prisma from '@/lib/prisma'; // Adjust path as needed to your Prisma setup
 import { sendVerificationEmail } from '@/lib/email';
 import crypto from 'crypto';
