@@ -35,8 +35,9 @@ async function fetchUserData(username: string) {
 type UserPageProps = Promise<{username: string }>
 
 export default async function UserPage(props: { params: UserPageProps}) {
-  const params = use(props.params);
-  const { username } = params;
+  const params = props.params;
+  const { username } = await params;
+  console.log(username)
 
   // Fetch user data based on the username
   const userData = await fetchUserData(username);
