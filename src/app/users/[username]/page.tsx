@@ -32,13 +32,10 @@ async function fetchUserData(username: string) {
   };
 }
 
-interface UserPageProps {
-  params: {
-    username: string; // Matches the folder name
-  };
-}
+type UserPageProps = Promise<{username: string }>
 
-export default async function UserPage({ params }: UserPageProps) {
+export default async function UserPage(props: { params: UserPageProps}) {
+  const params = use(props.params);
   const { username } = params;
 
   // Fetch user data based on the username
