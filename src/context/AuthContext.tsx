@@ -8,7 +8,12 @@ type AuthContextType = {
   setAuthenticated: (authStatus: boolean, userData?: { userId: string; email: string }) => void;
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface User {
+  userId: string;
+  email: string;
+}
+
+const AuthContext = React.createContext<{ user: User | null }>({ user: null });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -16,7 +21,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   //use user for now: 
   console.log(user) 
-  
+
   // Check login state once on load
    useEffect(() => {
     const verifyUser = async () => {
