@@ -4,8 +4,22 @@ import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
+interface PhaseOneProps {
+  formData: { name: string; username: string }; // Adjust based on your actual form data structure
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  checkUsername: () => Promise<void>; // Assuming it's an async function
+  usernameAvailable: boolean;
+  setPhase: (phase: number) => void; // Assuming `setPhase` accepts a phase number
+}
+
 // Phase 1: Name and Username Entry with Availability Check
-function PhaseOne({ formData, handleChange, checkUsername, usernameAvailable, setPhase }) {
+function PhaseOne({
+  formData,
+  handleChange,
+  checkUsername,
+  usernameAvailable,
+  setPhase,
+}: PhaseOneProps) {
   return (
     <div className="space-y-4">
       <input
