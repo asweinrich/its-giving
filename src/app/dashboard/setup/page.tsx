@@ -9,7 +9,7 @@ import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 interface FormData {
   name: string;
   username: string;
-  imageUrl: File;
+  imageUrl?: File;
   bio: string;
   phone: string;
 }
