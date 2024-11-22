@@ -4,6 +4,16 @@ import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
+
+// Define types for the form data and props
+interface FormData {
+  name: string;
+  username: string;
+  imageUrl: File | null;
+  bio: string;
+  phone: string;
+}
+
 interface PhaseOneProps {
   formData: { name: string; username: string }; // Adjust based on your actual form data structure
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -16,9 +26,9 @@ interface PhaseTwoProps {
   formData: {
     bio?: string;
     phone?: string;
-    image?: string; // Add more fields if necessary
+    imageUrl?: File; // Add more fields if necessary
   };
-  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleChange: (e: { target: { name: string; value: string | File } }) => void;
   handleSubmit: () => Promise<void>; // Assuming this is an async function
   loading: boolean;
 }
@@ -84,13 +94,19 @@ function PhaseTwo({
       <input
         type="file"
         name="imageUrl"
-        onChange={(e) => handleChange({ target: { name: "imageUrl", value: e.target.files[0] } })}
+        onChange={(e) =>
+          handleChange({
+            target: { name: "imageUrl", value: e.target.files ? e.target.files[0] : "" },
+          })
+        }
         className="w-full p-2 bg-slate-600 text-slate-100 rounded"
       />
       <textarea
         name="bio"
         value={formData.bio || ""}
-        onChange={handleChange}
+        onChange={(e) =>
+          handleChange({ target: { name: "bio", value: e.target.value } })
+        }
         placeholder="Bio"
         className="w-full p-2 rounded bg-slate-600 text-slate-100"
       />
@@ -98,7 +114,9 @@ function PhaseTwo({
         type="tel"
         name="phone"
         value={formData.phone || ""}
-        onChange={handleChange}
+        onChange={(e) =>
+          handleChange({ target: { name: "phone", value: e.target.value } })
+        }
         placeholder="Phone Number"
         className="w-full p-2 rounded bg-slate-600 text-slate-100"
       />
@@ -121,7 +139,7 @@ export default function SetupPage() {
 
   // State to track form data and progress
   const [phase, setPhase] = useState(1);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     username: "",
     imageUrl: null,
@@ -132,7 +150,7 @@ export default function SetupPage() {
   const [loading, setLoading] = useState(false);
 
   // Handle input change and update form data
-  const handleChange = (e) => {
+  const handleChange = (e: { target: { name: string; value: string | File } }) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
