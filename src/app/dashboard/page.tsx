@@ -17,7 +17,7 @@ interface User {
 
 export default function DashboardPage() {
   const [activeSection, setActiveSection] = useState("Home");
-  const { user } = useAuth(); // Assuming `useAuth` provides user data from session/context
+  const { user }: { user: User | null } = useAuth(); // Explicitly type `user`
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
