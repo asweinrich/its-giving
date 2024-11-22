@@ -90,15 +90,14 @@ function PhaseTwo({
       <textarea
         name="bio"
         value={formData.bio || ""}
-        text="textarea"
         onChange={handleChange}
         placeholder="Bio"
         className="w-full p-2 rounded bg-slate-600 text-slate-100"
       />
       <input
         type="tel"
-        name="phoneNumber"
-        value={formData.phoneNumber || ""}
+        name="phone"
+        value={formData.phone || ""}
         onChange={handleChange}
         placeholder="Phone Number"
         className="w-full p-2 rounded bg-slate-600 text-slate-100"
@@ -127,7 +126,7 @@ export default function SetupPage() {
     username: "",
     imageUrl: null,
     bio: "",
-    phoneNumber: "",
+    phone: "",
   });
   const [usernameAvailable, setUsernameAvailable] = useState(true);
   const [loading, setLoading] = useState(false);
