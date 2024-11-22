@@ -9,7 +9,7 @@ import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 interface FormData {
   name: string;
   username: string;
-  imageUrl: File | null;
+  imageUrl: File;
   bio: string;
   phone: string;
 }
@@ -142,7 +142,7 @@ export default function SetupPage() {
   const [formData, setFormData] = useState<FormData>({
     name: "",
     username: "",
-    imageUrl: null,
+    imageUrl: undefined,
     bio: "",
     phone: "",
   });
