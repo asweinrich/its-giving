@@ -25,7 +25,6 @@ export default function DashboardPage() {
       // Ensure `user.userId` exists before setting it
       if (user.userId) {
         setUserId(user.userId);
-        console.log("User: ", User)
         console.log("userId: ", userId)
       } else {
         console.warn("userId is missing in the user object:", user);
