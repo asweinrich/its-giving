@@ -7,7 +7,7 @@ import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 interface PhaseOneProps {
   formData: { name: string; username: string }; // Adjust based on your actual form data structure
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  checkUsername: () => Promise<void>; // Assuming it's an async function
+  checkUsername: (username: string) => Promise<void>; // Assuming it's an async function
   usernameAvailable: boolean;
   setPhase: (phase: number) => void; // Assuming `setPhase` accepts a phase number
 }
