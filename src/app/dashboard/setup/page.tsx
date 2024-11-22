@@ -156,12 +156,17 @@ export default function SetupPage() {
   };
 
   // Check if the username is available (mockup; replace with actual DB check)
-  const checkUsername = async (username) => {
+  const checkUsername = async (username: string) => {
     setLoading(true);
-    const response = await fetch(`/api/users/check-username?username=${username}`);
-    const data = await response.json();
-    setUsernameAvailable(data.available);
-    setLoading(false);
+    try {
+      const response = await fetch(`/api/users/check-username?username=${username}`);
+      const data = await response.json();
+      setUsernameAvailable(data.available);
+    } catch (error) {
+      console.error("Error checking username:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handle form submission
