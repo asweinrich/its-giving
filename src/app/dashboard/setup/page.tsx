@@ -12,6 +12,17 @@ interface PhaseOneProps {
   setPhase: (phase: number) => void; // Assuming `setPhase` accepts a phase number
 }
 
+interface PhaseTwoProps {
+  formData: {
+    bio?: string;
+    phone?: string;
+    image?: string; // Add more fields if necessary
+  };
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleSubmit: () => Promise<void>; // Assuming this is an async function
+  loading: boolean;
+}
+
 // Phase 1: Name and Username Entry with Availability Check
 function PhaseOne({
   formData,
@@ -62,7 +73,12 @@ function PhaseOne({
 }
 
 // Phase 2: Optional Profile Info (Image, Bio, Phone)
-function PhaseTwo({ formData, handleChange, handleSubmit, loading }) {
+function PhaseTwo({
+  formData,
+  handleChange,
+  handleSubmit,
+  loading,
+}: PhaseTwoProps) {
   return (
     <div className="space-y-4">
       <input
@@ -73,7 +89,8 @@ function PhaseTwo({ formData, handleChange, handleSubmit, loading }) {
       />
       <textarea
         name="bio"
-        value={formData.bio}
+        value={formData.bio || ""}
+        text="textarea"
         onChange={handleChange}
         placeholder="Bio"
         className="w-full p-2 rounded bg-slate-600 text-slate-100"
@@ -81,7 +98,7 @@ function PhaseTwo({ formData, handleChange, handleSubmit, loading }) {
       <input
         type="tel"
         name="phoneNumber"
-        value={formData.phoneNumber}
+        value={formData.phoneNumber || ""}
         onChange={handleChange}
         placeholder="Phone Number"
         className="w-full p-2 rounded bg-slate-600 text-slate-100"
