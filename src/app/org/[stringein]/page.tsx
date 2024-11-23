@@ -12,7 +12,7 @@ export default function OrgPage() {
   const { stringein } = useParams(); // Extract EIN from URL
   const [orgData, setOrgData] = useState(null); // Store nonprofit data
   const [loading, setLoading] = useState(true); // Track loading state
-  const [error, setError] = useState(null); // Track errors
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("about"); // Track active tab
 
   useEffect(() => {
