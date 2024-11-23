@@ -101,7 +101,7 @@ export default function ImpactChart({ filingsWithData }: ImpactChartProps) {
         callbacks: {
           label: (context: TooltipItem<'line'>) => {
             const datasetLabel = context.dataset.label || "";
-            const value = `$${context.raw.toLocaleString()}`;
+            const value = `$${(context.raw as number).toLocaleString()}`;
             return `${datasetLabel}:\n${value}`;
           },
         },
