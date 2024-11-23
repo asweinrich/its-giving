@@ -11,6 +11,7 @@ import {
   Tooltip,
   Legend,
   TooltipItem,
+  ChartOptions
 } from "chart.js";
 
 // Register necessary components for Chart.js
@@ -74,7 +75,7 @@ export default function ImpactChart({ filingsWithData }: ImpactChartProps) {
     ],
   };
 
-  const options = {
+  const options: ChartOptions<"line"> = {
     responsive: true,
     plugins: {
       legend: {
