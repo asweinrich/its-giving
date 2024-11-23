@@ -10,6 +10,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  TooltipItem,
 } from "chart.js";
 
 // Register necessary components for Chart.js
@@ -96,8 +97,9 @@ export default function ImpactChart({ filingsWithData }: ImpactChartProps) {
         mode: "index",
         intersect: false,
         yAlign: "center",
+        displayColors: false, // Hides the color marker
         callbacks: {
-          label: (context) => {
+          label: (context: TooltipItem<'line'>) => {
             const datasetLabel = context.dataset.label || "";
             const value = `$${context.raw.toLocaleString()}`;
             return `${datasetLabel}:\n${value}`;
