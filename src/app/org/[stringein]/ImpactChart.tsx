@@ -148,11 +148,11 @@ export default function ImpactChart({ filingsWithData }: ImpactChartProps) {
         },
         ticks: {
           font: { size: 10, family: "Inter, sans-serif" },
-          color: "rgb(156, 163, 175)",
-          callback: (value) => {
-            if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-            if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
-            return value;
+          color: "rgb(156, 163, 175)", // Tailwind slate-400 for tick labels
+          callback: (value: number) => {
+            if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`; // Convert to millions
+            if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`; // Convert to thousands
+            return value.toString(); // Convert small numbers to string
           },
         },
         min: 0,
