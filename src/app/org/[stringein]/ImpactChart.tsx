@@ -15,11 +15,21 @@ import {
 // Register necessary components for Chart.js
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-export default function ImpactChart({ filingsWithData }) {
+// Define the shape of financial data
+interface FinancialRecord {
+  year: number;
+  revenue: number;
+  expenses: number;
+}
 
+interface ImpactChartProps {
+  filingsWithData: FinancialRecord[];
+}
+
+export default function ImpactChart({ filingsWithData }: ImpactChartProps) {
   // Ensure the data array exists and has valid entries
   const filteredData = filingsWithData.filter(
-    (filing) => filing.revenue !== null && filing.revenue !== undefined
+    (filing: FinancialRecord) => filing.revenue !== null && filing.revenue !== undefined
   );
 
   if (filteredData.length === 0) {
@@ -31,17 +41,14 @@ export default function ImpactChart({ filingsWithData }) {
     );
   }
 
-  // Extract years and revenue for the graph
-  const years = filteredData.map((filing) => filing.year);
-  const revenue = filteredData.map((filing) => filing.revenue);
-  const expenses = filteredData.map((filing) => filing.expenses);
-
-
-
+  // Extract years, revenue, and expenses for the graph
+  const years = filteredData.map((filing: FinancialRecord) => filing.year);
+  const revenue = filteredData.map((filing: FinancialRecord) => filing.revenue);
+  const expenses = filteredData.map((filing: FinancialRecord) => filing.expenses);
 
   // Chart.js data and options
   const data = {
-    labels: years, // X-axis labels
+    labels: years,
     datasets: [
       {
         label: "Revenue",
@@ -73,7 +80,7 @@ export default function ImpactChart({ filingsWithData }) {
         display: true,
         position: "top",
         labels: {
-          color: "rgb(156, 163, 175)", // Font color (Tailwind slate-400)
+          color: "rgb(156, 163, 175)", // Tailwind slate-400
           font: {
             size: 14, // Font size for legend labels
             family: "Inter, sans-serif", // Font family for legend labels
@@ -86,73 +93,48 @@ export default function ImpactChart({ filingsWithData }) {
         },
       },
       tooltip: {
-        mode: "index", // Ensures all datasets on the same X-axis point are displayed
-        intersect: false, // Activates tooltips when hovering anywhere along the X-axis
+        mode: "index",
+        intersect: false,
         yAlign: "center",
         callbacks: {
           label: (context) => {
-            // Customize the label format
-            const datasetLabel = context.dataset.label || ""; // Get the dataset label (e.g., "Revenue")
-            const value = `$${context.raw.toLocaleString()}`; // Format the value as currency
-
-            return `${datasetLabel}:\n${value}`; // Use "\n" for a new line
+            const datasetLabel = context.dataset.label || "";
+            const value = `$${context.raw.toLocaleString()}`;
+            return `${datasetLabel}:\n${value}`;
           },
         },
         backgroundColor: "rgba(15, 23, 42, 0.8)", // Tailwind bg-slate-900 with opacity
-        titleColor: "#ffffff", // Title text color
-        titleFont: {
-          family: "Inter, sans-serif", // Font family for the title
-          size: 14, // Font size for the title
-          weight: "normal", // Font weight for the title
-          lineHeight: 1.5, // Line height for the title
-        },
-        titleAlign: "start", // Align title text (start, center, end)
-        bodyColor: "#d1d5db", // Body text color (Tailwind slate-300)
-        bodyFont: {
-          family: "Inter, sans-serif", // Font family for the body
-          size: 12, // Font size for the body
-          weight: "normal", // Font weight for the body
-          lineHeight: 1.6, // Line height for the body
-        },
-        bodyAlign: "start", // Align body text (start, center, end)
-        padding: 14, // Padding inside the tooltip
-        borderColor: "rgba(156, 163, 175, 0.2)", // Tailwind slate-400 with opacity
-        borderWidth: 1, // Border width
-        cornerRadius: 4, // Rounds the tooltip corners
-        displayColors: false, // Show dataset color indicators
-        boxWidth: 6, // Width of the color box
-        boxHeight: 6, // Height of the color box
+        titleColor: "#ffffff",
+        titleFont: { family: "Inter, sans-serif", size: 14 },
+        bodyColor: "#d1d5db",
+        bodyFont: { family: "Inter, sans-serif", size: 12 },
+        padding: 14,
+        borderColor: "rgba(156, 163, 175, 0.2)",
+        borderWidth: 1,
+        cornerRadius: 4,
       },
     },
     interaction: {
-      mode: "index", // Aligns tooltips for all datasets at the same X-axis point
-      intersect: false, // Triggers tooltips for all datasets, not just the one under the cursor
+      mode: "index",
+      intersect: false,
     },
     scales: {
       x: {
         title: {
           display: true,
           text: "Year",
-          color: "#9ca3af", // Tailwind slate-400
-          font: {
-            family: "Inter, sans-serif", // Font family for the body
-            size: 14,
-          },
+          color: "#9ca3af",
+          font: { family: "Inter, sans-serif", size: 14 },
         },
-        grid: {
-          display: false, // Disables vertical gridlines
-        },
+        grid: { display: false },
         ticks: {
-          font: {
-            size: 10, // Smaller font size for tick labels
-            family: "Inter, sans-serif", // Font family for the body
-          },
-          color: "rgb(156, 163, 175)", // Tailwind slate-400 for tick labels
+          font: { size: 10, family: "Inter, sans-serif" },
+          color: "rgb(156, 163, 175)",
         },
         border: {
-          display: true, // Ensure the X-axis line is visible
-          color: "rgb(156, 163, 175)", // Tailwind slate-400 for axis line
-          width: 2, // Adjust thickness of the axis line
+          display: true,
+          color: "rgb(156, 163, 175)",
+          width: 2,
         },
       },
       y: {
@@ -160,46 +142,33 @@ export default function ImpactChart({ filingsWithData }) {
           display: true,
           text: "Dollars ($)",
           color: "#9ca3af",
-          font: {
-            family: "Inter, sans-serif", // Font family for the body
-            size: 14,
-          },
+          font: { family: "Inter, sans-serif", size: 14 },
         },
         ticks: {
-          font: {
-            size: 10, // Smaller font size for tick labels
-            family: "Inter, sans-serif", // Font family for the body
-          },
-          color: "rgb(156, 163, 175)", // Tailwind slate-400 for tick labels
+          font: { size: 10, family: "Inter, sans-serif" },
+          color: "rgb(156, 163, 175)",
           callback: (value) => {
-            if (value >= 1_000_000) {
-              return `${(value / 1_000_000).toFixed(1)}M`; // Convert to millions with one decimal
-            } else if (value >= 10_000) {
-              return `${(value / 1_000).toFixed(0)}K`; // Convert to thousands with one decimal
-            } else if (value >= 1_000) {
-              return `${(value / 1_000).toFixed(1)}K`; // Convert to thousands with one decimal
-            }
-            return value; // Show full value if less than 1,000
+            if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+            if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
+            return value;
           },
         },
         min: 0,
-        grid: {
-          display: false, // Disables horizontal gridlines
-        },
+        grid: { display: false },
         border: {
-          display: true, // Ensure the Y-axis line is visible
-          color: "rgb(156, 163, 175)", // Tailwind slate-400 for axis line
-          width: 2, // Adjust thickness of the axis line
+          display: true,
+          color: "rgb(156, 163, 175)",
+          width: 2,
         },
       },
     },
     elements: {
       point: {
-        radius: 5, // Size of the markers
-        backgroundColor: "rgba(34, 197, 94, 1)", // Tailwind green-500 (solid color)
-        borderColor: "rgba(156, 163, 175, 1)", // Same color as the outline
-        borderWidth: 5, // Thickness of the outline
-        hoverRadius: 7, // Size on hover
+        radius: 5,
+        backgroundColor: "rgba(34, 197, 94, 1)",
+        borderColor: "rgba(156, 163, 175, 1)",
+        borderWidth: 5,
+        hoverRadius: 7,
       },
     },
   };
@@ -216,4 +185,3 @@ export default function ImpactChart({ filingsWithData }) {
     </div>
   );
 }
-

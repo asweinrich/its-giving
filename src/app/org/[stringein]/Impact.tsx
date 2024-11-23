@@ -2,7 +2,17 @@ import ImpactChart from './ImpactChart';
 import ImpactMap from './ImpactMap';
 import { useMemo } from "react";
 
-export default function ImpactTab({ financialRecords }) {
+interface FinancialRecord {
+  year: number;
+  revenue: number;
+  expenses: number;
+}
+
+interface ImpactTabProps {
+  financialRecords: FinancialRecord[];
+}
+
+export default function ImpactTab({ financialRecords }: ImpactTabProps) {
   // Memoize the map component to avoid unnecessary re-renders
   const MemoizedMap = useMemo(() => <ImpactMap />, []);
 

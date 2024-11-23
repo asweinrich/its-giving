@@ -1,8 +1,21 @@
-export default function AboutTab({ category, subcategory, city, state, rulingDate }) {
-  
-  const formatRulingDate = (rulingDate) => {
+interface AboutTabProps {
+  category: string;
+  subcategory: string;
+  city: string;
+  state: string;
+  rulingDate: string; // Assuming rulingDate is a string (e.g., "2018-08-01")
+}
+
+export default function AboutTab({
+  category,
+  subcategory,
+  city,
+  state,
+  rulingDate,
+}: AboutTabProps) {
+
+  const formatRulingDate = (rulingDate: string) => {
     const date = new Date(rulingDate); // Parse the ruling_date
-    console.log(rulingDate)
     return date.toLocaleString("en-US", { month: "long", year: "numeric" }); // Format as "Month YYYY"
   };
 
