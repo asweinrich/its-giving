@@ -150,10 +150,11 @@ export default function ImpactChart({ filingsWithData }: ImpactChartProps) {
         ticks: {
           font: { size: 10, family: "Inter, sans-serif" },
           color: "rgb(156, 163, 175)", // Tailwind slate-400 for tick labels
-          callback: (value: number) => {
-            if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`; // Convert to millions
-            if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`; // Convert to thousands
-            return value.toString(); // Convert small numbers to string
+          callback: (tickValue: string | number) => {
+            const numericValue = typeof tickValue === "string" ? parseFloat(tickValue) : tickValue; // Convert string to number if needed
+            if (numericValue >= 1_000_000) return `${(numericValue / 1_000_000).toFixed(1)}M`;
+            if (numericValue >= 1_000) return `${(numericValue / 1_000).toFixed(1)}K`;
+            return numericValue.toString(); // Return the value as a string
           },
         },
         min: 0,
