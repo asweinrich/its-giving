@@ -5,6 +5,11 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
 
+type Credentials = {
+  email: string;
+  password: string;
+};
+
 export const authOptions: NextAuthOptions = {
   providers: [
     // Google Sign-In
@@ -19,7 +24,10 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials?: Credentials) {
+        if (!credentials) {
+          throw new Error("Missing credentials");
+        }
         const user = await prisma.user.findUnique({
           where: { email: credentials?.email },
         });
