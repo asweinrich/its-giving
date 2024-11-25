@@ -49,6 +49,9 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   callbacks: {
     async session({ session, token }) {
+      if (!session.user) {
+        session.user = {}; // Initialize as an empty object if undefined
+      }
       session.user.id = token.sub;
       session.user.roles = token.roles;
       session.user.emailVerified = token.emailVerified; // Add email verification status to session
