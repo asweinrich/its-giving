@@ -191,7 +191,13 @@ export default function OrgPage() {
         {/* Tab Content */}
         <div className="mt-4 px-2">
           {activeTab === "about" && (
-            <AboutTab category={category} subcategory={subcategory} city={city} state={state} rulingDate={ruling_date} />
+            <AboutTab
+              category={category || "Unknown"}
+              subcategory={subcategory || "Unknown"}
+              city={city || "Unknown"}
+              state={state || "Unknown"}
+              rulingDate={ruling_date || "Unknown"}
+            />
           )}
           {activeTab === "impact" && <ImpactTab financialRecords={financialRecords} />}
         </div>
