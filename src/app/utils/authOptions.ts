@@ -24,19 +24,26 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials?: Credentials) {
-        if (!credentials) {
-          throw new Error("Missing credentials");
+      async authorize(credentials) {
+        if (!credentials || !credentials.password || !credentials.email) {
+          throw new Error("Missing email or password");
         }
+
         const user = await prisma.user.findUnique({
-          where: { email: credentials?.email },
+          where: { email: credentials.email },
         });
 
         if (user && (await bcrypt.compare(credentials.password, user.passwordHash))) {
-          return { id: user.id.toString(), email: user.email, name: user.name, roles: user.roles };
+          return {
+            id: user.id.toString(),
+            email: user.email,
+            name: user.name,
+            roles: Array.isArray(user.roles) ? (user.roles as Role[]) : [],
+          };
         }
+
         return null;
-      },
+      }
     }),
   ],
   adapter: PrismaAdapter(prisma),
