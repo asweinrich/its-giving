@@ -8,9 +8,28 @@ import nteeCodes from "../../data/ntee_codes.json"; // Import the NTEE codes JSO
 import AboutTab from "./About";
 import ImpactTab from "./Impact";
 
+interface Organization {
+  name: string;
+  city: string;
+  state: string;
+  ntee_code?: string;
+  ruling_date?: string;
+}
+
+interface OrgData {
+  organization: Organization;
+  filings_with_data?: {
+    tax_prd_yr: number;
+    totrevenue?: number;
+    totfuncexpns?: number;
+    totnetassetsend?: number;
+    totexcessyr?: number;
+  }[];
+}
+
 export default function OrgPage() {
   const { stringein } = useParams(); // Extract EIN from URL
-  const [orgData, setOrgData] = useState(null); // Store nonprofit data
+  const [orgData, setOrgData] = useState<OrgData | null>(null); // Store nonprofit data
   const [loading, setLoading] = useState(true); // Track loading state
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("about"); // Track active tab
@@ -20,13 +39,11 @@ export default function OrgPage() {
     const fetchOrgData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/org/propublica?ein=${stringein}`
-        );
+        const response = await fetch(`/api/org/propublica?ein=${stringein}`);
         if (!response.ok) {
           throw new Error(`Error fetching data: ${response.statusText}`);
         }
-        const data = await response.json();
+        const data: OrgData = await response.json(); // Explicitly type the response
         setOrgData(data);
       } catch (err) {
         console.error(err);
@@ -47,7 +64,7 @@ export default function OrgPage() {
     return <div className="text-center text-red-500">{error}</div>;
   }
 
-  if (!orgData) {
+  if (!orgData?.organization) {
     return <div className="text-center text-white">No data available for this EIN.</div>;
   }
 
