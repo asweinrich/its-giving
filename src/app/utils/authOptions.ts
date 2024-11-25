@@ -29,7 +29,7 @@ export const authOptions: NextAuthOptions = {
           where: { email: credentials.email },
         });
 
-        if (user && (await bcrypt.compare(credentials.password as string, user.passwordHash))) {
+        if (user && (await bcrypt.compare(credentials.password as string, user.passwordHash as string))) {
           return {
             id: user.id.toString(),
             email: user.email,
