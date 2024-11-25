@@ -27,6 +27,18 @@ interface OrgData {
   }[];
 }
 
+type NteeCodes = {
+  [key: string]: {
+    title: string;
+    subcategories: {
+      [key: string]: string;
+    };
+  };
+};
+
+const nteeCodesTyped: NteeCodes = nteeCodes; // Ensure TypeScript validation
+
+
 export default function OrgPage() {
   const { stringein } = useParams(); // Extract EIN from URL
   const [orgData, setOrgData] = useState<OrgData | null>(null); // Store nonprofit data
@@ -74,15 +86,14 @@ export default function OrgPage() {
     if (!code) return { category: "Unknown", subcategory: "Unknown" };
 
     const generalCategoryKey = code[0]; // First letter of the NTEE code
-    const generalCategory = nteeCodes[generalCategoryKey];
-    if (!generalCategory) return { category: "Unknown", subcategory: "Unknown" };
-
+    const generalCategory = nteeCodesTyped[generalCategoryKey] || { title: "Unknown", subcategories: {} };
     const subcategory = generalCategory.subcategories[code] || "Unknown";
+
     return {
       category: generalCategory.title,
-      subcategory: subcategory
+      subcategory: subcategory,
     };
-  }; 
+  };
   const { category, subcategory } = getNteeDetails(ntee_code);
 
   const processFinancialData = (filingsWithData) => {
