@@ -5,6 +5,8 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
 
+type Role = "ADMIN" | "USER" | "MODERATOR"; // Add roles as needed
+
 export const authOptions: NextAuthOptions = {
   providers: [
     // Google Sign-In
