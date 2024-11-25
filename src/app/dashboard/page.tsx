@@ -33,7 +33,7 @@ export default function DashboardPage() {
       console.warn("User is not authenticated. Redirect or handle appropriately.");
       // Optionally redirect to a login page or show a message
     }
-  }, [user]);
+  }, [user.userId]);
 
 
 
