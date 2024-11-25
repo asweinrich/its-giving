@@ -18,13 +18,7 @@ interface Organization {
 
 interface OrgData {
   organization: Organization;
-  filings_with_data?: {
-    tax_prd_yr: number;
-    totrevenue?: number;
-    totfuncexpns?: number;
-    totnetassetsend?: number;
-    totexcessyr?: number;
-  }[];
+  filings_with_data?: Filing[];
 }
 
 type NteeCodes = {
@@ -38,6 +32,13 @@ type NteeCodes = {
 
 const nteeCodesTyped: NteeCodes = nteeCodes; // Ensure TypeScript validation
 
+type Filing = {
+  tax_prd_yr: number;
+  totrevenue?: number;
+  totfuncexpns?: number;
+  totnetassetsend?: number;
+  totexcessyr?: number;
+};
 
 export default function OrgPage() {
   const { stringein } = useParams(); // Extract EIN from URL
@@ -96,13 +97,16 @@ export default function OrgPage() {
   };
   const { category, subcategory } = getNteeDetails(ntee_code);
 
-  const processFinancialData = (filingsWithData) => {
+  const processFinancialData = (filingsWithData: Filing[]) => {
     if (!Array.isArray(filingsWithData) || filingsWithData.length === 0) {
       return [];
     }
 
     return filingsWithData
-      .filter((filing) => filing.tax_prd_yr && filing.totrevenue !== undefined) // Ensure required fields exist
+      .filter(
+        (filing) =>
+          filing.tax_prd_yr && filing.totrevenue !== undefined // Ensure required fields exist
+      )
       .map((filing) => ({
         year: filing.tax_prd_yr,
         revenue: (filing.totrevenue || 0) / 100, // Adjust revenue
