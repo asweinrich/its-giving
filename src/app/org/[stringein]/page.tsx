@@ -70,7 +70,7 @@ export default function OrgPage() {
 
   const { name, city, state, ntee_code, ruling_date } = orgData.organization;
 
-  const getNteeDetails = (code) => {
+  const getNteeDetails = (code: string | undefined) => {
     if (!code) return { category: "Unknown", subcategory: "Unknown" };
 
     const generalCategoryKey = code[0]; // First letter of the NTEE code
