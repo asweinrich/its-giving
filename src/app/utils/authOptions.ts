@@ -7,6 +7,18 @@ import bcrypt from "bcrypt";
 
 type Role = "ADMIN" | "USER" | "MODERATOR"; // Add roles as needed
 
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      roles: string[];
+      email?: string | null;
+      name?: string | null;
+      emailVerified?: boolean;
+    };
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     // Google Sign-In
@@ -49,10 +61,7 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   callbacks: {
     async session({ session, token }) {
-      if (!session.user) {
-        session.user = {}; // Initialize as an empty object if undefined
-      }
-      session.user.id = token.sub;
+      session.user.id = token.sub!;
       session.user.roles = token.roles;
       session.user.emailVerified = token.emailVerified; // Add email verification status to session
       return session;
