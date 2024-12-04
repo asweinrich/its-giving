@@ -48,7 +48,7 @@ export const authOptions: NextAuthOptions = {
             id: user.id.toString(),
             email: user.email,
             name: user.name,
-            roles: Array.isArray(user.roles) ? (user.roles as Role[]) : [],
+            roles: Array.isArray(user.roles) ? user.roles : [],
           };
         }
 
@@ -62,13 +62,13 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ session, token }) {
       session.user.id = token.sub!;
-      session.user.roles = token.roles;
+      session.user.roles = Array.isArray(token.roles) ? token.roles : [];
       session.user.emailVerified = token.emailVerified; // Add email verification status to session
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
-        token.roles = user.roles;
+        token.roles = user.roles || [];
         token.emailVerified = user.emailVerified; // Add email verification status to token
       }
       return token;
