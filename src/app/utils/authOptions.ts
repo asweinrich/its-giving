@@ -69,7 +69,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.roles = user.roles || [];
-        token.emailVerified = user.emailVerified; // Add email verification status to token
+        token.emailVerified = !!user.emailVerified; // Add email verification status to token
       }
       return token;
     },
