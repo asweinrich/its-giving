@@ -1,9 +1,26 @@
+import { CakeIcon, BuildingOfficeIcon } from "@heroicons/react/24/outline";
+import ImpactChart from './ImpactChart';
+import ImpactMap from './ImpactMap';
+import AboutText from './AboutText';
+import { useMemo } from "react";
+
+
+
+
 interface AboutTabProps {
   category: string;
   subcategory: string;
   city: string;
   state: string;
   rulingDate: string; // Assuming rulingDate is a string (e.g., "2018-08-01")
+  financialRecords: FinancialRecord[];
+  npid: string;
+}
+
+interface FinancialRecord {
+  year: number;
+  revenue: number;
+  expenses: number;
 }
 
 export default function AboutTab({
@@ -12,6 +29,8 @@ export default function AboutTab({
   city,
   state,
   rulingDate,
+  financialRecords,
+  npid
 }: AboutTabProps) {
 
   const formatRulingDate = (rulingDate: string) => {
@@ -21,17 +40,21 @@ export default function AboutTab({
 
   const formattedDate = formatRulingDate(rulingDate);
 
+  const MemoizedMap = useMemo(() => <ImpactMap city={city || "Unknown"} state={state || "Unknown"} />, []);
+
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-2">About</h2>
       <p>{category}</p>
       <p className="text-sm text-slate-300 mb-2">{subcategory}</p>
-      <p className="text-slate-200">
-        {city}, {state}
+      <p className="text-slate-300 flex items-center space-x-1 mb-2">
+        <BuildingOfficeIcon className="w-5 h-5 inline me-2 mb-0.5" />Headquarters: <span className="text-slate-100">{city}, {state}</span>
       </p>
-      <p className="text-slate-300 text-sm">
-        Established <span className="text-slate-100">{formattedDate}</span>
+      <p className="text-slate-300 flex items-center space-x-1">
+        <CakeIcon className="w-5 h-5 inline me-2 mb-0.5" />Established <span className="text-slate-100">{formattedDate}</span>
       </p>
+      {MemoizedMap}
+      <ImpactChart filingsWithData={financialRecords} />
+      <AboutText npid={npid}/>
     </div>
   );
 }

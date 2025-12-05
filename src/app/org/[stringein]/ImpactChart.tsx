@@ -180,10 +180,10 @@ export default function ImpactChart({ filingsWithData }: ImpactChartProps) {
   return (
     <div className="my-6">
       <h2 className="text-lg font-semibold text-white mb-2">Revenue & Expenses</h2>
-      <p className="text-xs text-slate-300 mb-4">
-        Keeping revenue and expenses balanced is key to impact. Extra revenue helps an organization grow and expand programs. Rising expenses might show growth but can also indicate the need for additional support to continue making a difference.
+      <p className="text-sm text-slate-300 mb-4 max-w-4xl">
+        Keeping revenue and expenses balanced is key to impact. Extra revenue helps an organization grow and expand programs. Rising expenses might show growth, but can also indicate the need for additional support to continue making a difference.
       </p>
-      <div className="max-w-xl">
+      <div className="max-w-3xl">
         <Line data={data} options={options} />
       </div>
     </div>

@@ -197,9 +197,11 @@ export default function OrgPage() {
               city={city || "Unknown"}
               state={state || "Unknown"}
               rulingDate={ruling_date || "Unknown"}
+              financialRecords={financialRecords}
+              npid={stringein}
             />
           )}
-          {activeTab === "impact" && <ImpactTab financialRecords={financialRecords} />}
+          {activeTab === "impact" && <ImpactTab />}
         </div>
       </div>
 
