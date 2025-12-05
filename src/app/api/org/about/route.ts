@@ -19,7 +19,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Nonprofit not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ about: nonprofit.about });
+    return NextResponse.json({ about: nonprofit.description });
   } catch (error) {
     console.error("Error fetching about text:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
