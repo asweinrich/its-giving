@@ -1,10 +1,17 @@
 import ImpactMap from './ImpactMap';
 import { useMemo } from "react";
 
+interface ImpactTabProps {
+  address: string;
+  // ... other props as needed
+}
 
-export default function ImpactTab() {
+
+const ImpactTab = ({ address }: ImpactTabProps) => {
+
+  console.log('address: ', address)
   // Memoize the map component to avoid unnecessary re-renders
-  const MemoizedMap = useMemo(() => <ImpactMap />, []);
+  const MemoizedMap = useMemo(() => <ImpactMap address={address}/>, []);
 
   return (
     <div>
@@ -18,3 +25,5 @@ export default function ImpactTab() {
     </div>
   );
 }
+
+export default ImpactTab;

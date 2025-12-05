@@ -1,79 +1,77 @@
-"use client";
-
 import "maplibre-gl/dist/maplibre-gl.css";
 import maplibregl from "maplibre-gl";
 import { useEffect, useRef } from "react";
+import { MAP_DEFAULT_STYLE, MAP_DEFAULT_OPTIONS } from "@/config/mapStyle";
 
-interface MapProps {
-  city: string;
-  state: string;
-}
+interface ImpactMapProps { address: string; }
 
-const ImpactMap = ({ city, state }: MapProps) => {
-  const mapContainer = useRef(null);
-
-  // Function to fetch coordinates from a geocoding API
-  const fetchCoordinates = async (location: string): Promise<{ lat: number; lng: number }> => {
-    
-
-    const apiKey = "7e902a24d10142fd9559d0610b57a731"; // Replace with your API key
-      
-    console.log('api key: ',apiKey)
-
-    const response = await fetch(
-      `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(location)}&key=${apiKey}`
-    );
-    const data = await response.json();
-
-    if (data.results && data.results.length > 0) {
-      const { lat, lng } = data.results[0].geometry;
-      return { lat, lng };
-    } else {
-      throw new Error("Location not found");
-    }
-  };
+const ImpactMap = ({ address }: ImpactMapProps) => {
+  const mapContainer = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!mapContainer.current) return;
+    let map: maplibregl.Map | null = null;
+    let marker: maplibregl.Marker | null = null;
+    let popup: maplibregl.Popup | null = null;
 
-    const map = new maplibregl.Map({
-      container: mapContainer.current, // Reference to the map's container
-      style: "https://demotiles.maplibre.org/style.json", // Open-source MapLibre tiles
-      center: [-122.4194, 37.7749], // Default to San Francisco
-      zoom: 2.5,
-    });
+    async function fetchCoordinates(location: string): Promise<{ lat: number; lng: number }> {
+      const apiKey = process.env.NEXT_PUBLIC_OPENCAGE_API_KEY; // Use env var for prod safety!
+      const resp = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(location)}&key=${apiKey}`);
+      const data = await resp.json();
+      if (data.results?.length) {
+        return data.results[0].geometry;
+      }
+      throw new Error("Location not found");
+    }
 
-    // Dynamically center the map based on city and state
-    const location = `${city}, ${state}`;
-    fetchCoordinates(location)
-      .then(({ lat, lng }) => {
-        map.setCenter([lng, lat]);
-        map.setZoom(2.5); // Adjust zoom level to focus on the location
+    if (address && mapContainer.current) {
+      fetchCoordinates(address).then(({ lat, lng }) => {
+        map = new maplibregl.Map({
+          container: mapContainer.current!,
+          style: MAP_DEFAULT_STYLE,
+          center: [lng, lat],
+          ...MAP_DEFAULT_OPTIONS,
+        });
 
-        // Add a marker at the new location
-        new maplibregl.Marker()
+        // Custom marker element for color etc.
+        const markerEl = document.createElement("div");
+        markerEl.style.background = MAP_DEFAULT_OPTIONS.markerColor;
+        markerEl.style.width = "18px";
+        markerEl.style.height = "18px";
+        markerEl.style.borderRadius = "50%";
+        markerEl.style.border = "2px solid #FFF";
+        markerEl.style.boxShadow = "0 0 8px #333";
+
+        marker = new maplibregl.Marker(markerEl)
           .setLngLat([lng, lat])
-          .setPopup(new maplibregl.Popup().setHTML(`<h3>${location}</h3>`))
           .addTo(map);
-      })
-      .catch((error) => {
-        console.error("Error fetching location coordinates:", error);
-      });
 
-    return () => map.remove(); // Cleanup map instance on unmount
-  }, [city, state]); // Re-run the effect if city or state changes
+        // Custom popup styles
+        popup = new maplibregl.Popup({ offset: 20 })
+          .setDOMContent(
+            (() => {
+              const popupDiv = document.createElement("div");
+              popupDiv.className = `${MAP_DEFAULT_OPTIONS.markerPopupBg} ${MAP_DEFAULT_OPTIONS.markerPopupTextColor} p-2 rounded-lg`;
+              popupDiv.innerHTML = `<strong>Org HQ</strong><br>${address}`;
+              return popupDiv;
+            })()
+          );
+        marker.setPopup(popup);
+        marker.togglePopup();
+      }).catch(console.error);
+    }
 
-  return (
-    <div className="my-6">
-      <h2 className="text-lg font-semibold text-white mb-2">Service Area</h2>
-      <p className="text-xs text-slate-300 mb-4">
-        Service Area and Headquarters
-      </p>
-      <div className="max-w-xl">
-        <div className="w-full max-w-xl h-48 md:h-72 rounded-lg" ref={mapContainer} />
-      </div>
-    </div>
-  );
+    return () => {
+      if (map) map.remove();
+    };
+  }, [address]);
+
+  return <div ref={mapContainer} style={{
+    height: "300px",
+    borderRadius: "16px",
+    overflow: "hidden",
+    boxShadow: "0 0 16px #222",
+    marginTop: "12px",
+  }} />;
 };
 
 export default ImpactMap;

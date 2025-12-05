@@ -10,8 +10,10 @@ import ImpactTab from "./Impact";
 
 interface Organization {
   name: string;
-  city: string;
-  state: string;
+  city?: string;
+  state?: string;
+  zipcode?: string;
+  address?: string;     // in case ProPublica sends a full combined address
   ntee_code?: string;
   ruling_date?: string;
 }
@@ -81,7 +83,8 @@ export default function OrgPage() {
     return <div className="text-center text-white">No data available for this EIN.</div>;
   }
 
-  const { name, city, state, ntee_code, ruling_date } = orgData.organization;
+  const { name, city, state, ntee_code, ruling_date, zipcode, address } = orgData.organization;
+  const fullAddress = [address, city, state, zipcode].filter(Boolean).join(', ');
 
   const getNteeDetails = (code: string | undefined) => {
     if (!code) return { category: "Unknown", subcategory: "Unknown" };
@@ -196,12 +199,15 @@ export default function OrgPage() {
               subcategory={subcategory || "Unknown"}
               city={city || "Unknown"}
               state={state || "Unknown"}
+              address={fullAddress || "Unknown"}
               rulingDate={ruling_date || "Unknown"}
               financialRecords={financialRecords}
               npid={stringein}
             />
           )}
-          {activeTab === "impact" && <ImpactTab />}
+          {activeTab === "impact" && (
+            <ImpactTab address={fullAddress} />
+          )}
         </div>
       </div>
 

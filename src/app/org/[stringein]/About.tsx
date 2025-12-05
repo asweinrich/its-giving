@@ -12,6 +12,7 @@ interface AboutTabProps {
   subcategory: string;
   city: string;
   state: string;
+  address: string;
   rulingDate: string; // Assuming rulingDate is a string (e.g., "2018-08-01")
   financialRecords: FinancialRecord[];
   npid: string;
@@ -28,6 +29,7 @@ export default function AboutTab({
   subcategory,
   city,
   state,
+  address,
   rulingDate,
   financialRecords,
   npid
@@ -40,14 +42,14 @@ export default function AboutTab({
 
   const formattedDate = formatRulingDate(rulingDate);
 
-  const MemoizedMap = useMemo(() => <ImpactMap city={city || "Unknown"} state={state || "Unknown"} />, []);
+  const MemoizedMap = useMemo(() => <ImpactMap address={address} />, []);
 
   return (
     <div>
       <p>{category}</p>
       <p className="text-sm text-slate-300 mb-2">{subcategory}</p>
       <p className="text-slate-300 flex items-center space-x-1 mb-2">
-        <BuildingOfficeIcon className="w-5 h-5 inline me-2 mb-0.5" />Headquarters: <span className="text-slate-100">{city}, {state}</span>
+        <BuildingOfficeIcon className="w-5 h-5 inline me-2 mb-0.5" />Based in <span className="text-slate-100">{city}, {state}</span>
       </p>
       <p className="text-slate-300 flex items-center space-x-1">
         <CakeIcon className="w-5 h-5 inline me-2 mb-0.5" />Established <span className="text-slate-100">{formattedDate}</span>

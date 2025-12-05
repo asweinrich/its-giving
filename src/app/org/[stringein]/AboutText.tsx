@@ -24,7 +24,7 @@ const AboutText = ({ npid }: AboutTextProps) => {
       }
     };
 
-    fetchAboutText();
+   // fetchAboutText();
   }, [npid]);
 
   if (error) {

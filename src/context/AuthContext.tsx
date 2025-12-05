@@ -15,7 +15,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<{ userId: string; email: string } | null>(null);
 
   //use user for now: 
-  console.log(user) 
   
   // Check login state once on load
    useEffect(() => {
@@ -38,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
-    verifyUser();
+    //verifyUser();
   }, []);
 
   const setAuthenticated = (authStatus: boolean, userData?: { userId: string; email: string }) => {
