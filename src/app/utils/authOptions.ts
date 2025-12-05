@@ -5,7 +5,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
 
-type Role = "ADMIN" | "USER" | "MODERATOR"; // Add roles as needed
+//type Role = "ADMIN" | "USER" | "MODERATOR"; // Add roles as needed
 
 declare module "next-auth" {
   interface Session {

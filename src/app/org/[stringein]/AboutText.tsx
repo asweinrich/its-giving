@@ -9,7 +9,7 @@ const AboutText = ({ npid }: AboutTextProps) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchAboutText = async () => {
+    /* const fetchAboutText = async () => {
       try {
         const response = await fetch(`/api/nonprofit/about?npid=${npid}`);
         if (!response.ok) {
@@ -24,7 +24,8 @@ const AboutText = ({ npid }: AboutTextProps) => {
       }
     };
 
-   // fetchAboutText();
+    fetchAboutText();
+    */
   }, [npid]);
 
   if (error) {
