@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   try {
     const nonprofit = await prisma.nonprofit.findUnique({
       where: { regulatoryId: npid },
-      select: { about: true },
+      select: { description: true },
     });
 
     if (!nonprofit) {
