@@ -8,6 +8,8 @@ const AboutText = ({ npid }: AboutTextProps) => {
   const [aboutText, setAboutText] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+
+
   useEffect(() => {
     /* const fetchAboutText = async () => {
       try {
@@ -26,6 +28,9 @@ const AboutText = ({ npid }: AboutTextProps) => {
 
     fetchAboutText();
     */
+
+    setAboutText('Test about Text')
+    setError(null)
   }, [npid]);
 
   if (error) {
