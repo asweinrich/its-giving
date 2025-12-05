@@ -202,7 +202,7 @@ export default function OrgPage() {
               address={fullAddress || "Unknown"}
               rulingDate={ruling_date || "Unknown"}
               financialRecords={financialRecords}
-              npid={stringein}
+              npid={Array.isArray(stringein) ? stringein[0] : stringein}
             />
           )}
           {activeTab === "impact" && (
