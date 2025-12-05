@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
   try {
     const nonprofit = await prisma.nonprofit.findUnique({
-      where: { regulatoryid: npid },
+      where: { regulatoryId: npid },
       select: { about: true },
     });
 
