@@ -63,7 +63,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       session.user.id = token.sub!;
       session.user.roles = Array.isArray(token.roles) ? token.roles : [];
-      session.user.emailVerified = token.emailVerified; // Add email verification status to session
+      session.user.emailVerified = !!token.emailVerified; // Add email verification status to session
       return session;
     },
     async jwt({ token, user }) {
