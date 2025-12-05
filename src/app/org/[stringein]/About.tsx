@@ -42,7 +42,7 @@ export default function AboutTab({
 
   const formattedDate = formatRulingDate(rulingDate);
 
-  const MemoizedMap = useMemo(() => <ImpactMap address={address} />, []);
+  const MemoizedMap = useMemo(() => <ImpactMap address={address} />, [address]);
 
   return (
     <div>

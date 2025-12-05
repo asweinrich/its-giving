@@ -11,7 +11,7 @@ const ImpactTab = ({ address }: ImpactTabProps) => {
 
   console.log('address: ', address)
   // Memoize the map component to avoid unnecessary re-renders
-  const MemoizedMap = useMemo(() => <ImpactMap address={address}/>, []);
+  const MemoizedMap = useMemo(() => <ImpactMap address={address}/>, [address]);
 
   return (
     <div>

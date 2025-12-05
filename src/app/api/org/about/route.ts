@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const npid = searchParams.get("npid");
+  const npid = searchParams.get("npid") || '00-0000000';
 
   if (!npid) {
     return NextResponse.json({ error: "npid is required" }, { status: 400 });
