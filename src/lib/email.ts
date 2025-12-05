@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 
 
-export async function sendVerificationEmail(to: string, token: string, userId: int) {
+export async function sendVerificationEmail(to: string, token: string, userId: number) {
   //use userId for now:
   console.log(userId)
 
