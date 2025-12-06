@@ -14,7 +14,7 @@ const ImpactMap = ({ address }: ImpactMapProps) => {
     let popup: maplibregl.Popup | null = null;
 
     async function fetchCoordinates(location: string): Promise<{ lat: number; lng: number }> {
-      const apiKey = process.env.OPENCAGE_API_KEY; // Use env var for prod safety!
+      const apiKey = process.env.NEXT_PUBLIC_OPENCAGE_API_KEY; // Use env var for prod safety!
       const resp = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(location)}&key=${apiKey}`);
       const data = await resp.json();
       if (data.results?.length) {
