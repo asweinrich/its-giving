@@ -13,6 +13,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum OrgType {
+  NONPROFIT
+  FOUNDATION
+  GRASSROOTS
+  GOVERNMENTAL
+  FAITH_BASED
+  PTA
+}
+
+enum ImpactScope {
+  HYPERLOCAL  // e.g., neighborhood or community
+  LOCAL       // city / county
+  REGIONAL    // multi-city or multi-county
+  STATE       // state-level
+  NATIONAL    // country-level
+  INTERNATIONAL
+}
+
 model User {
   id              Int     @id @default(autoincrement())
   email           String? @unique // Optional if the user signs up only with phone or OAuth
@@ -72,17 +90,28 @@ model Account {
 model Organization {
   id           Int     @id @default(autoincrement())
   name         String
+  type         OrgType? // e.g., NONPROFIT, FOUNDATION...
   description  String?
-  type         String?
   category     String?
   websiteUrl   String?
+  // Socials - explicit fields for common channels + flexible JSON for others
+  instagram    String?   // store handle or full URL
+  tiktok       String?
+
   imageUrl     String?
-  contactEmail String? //For organization verification, must match legitimate website url   
+  contactEmail String? //For organization verification, must match legitimate website url  
+
+  // Impact / location-ish data
+  impactScope  ImpactScope? // general scope level for UI filtering
+  impactAreas  Json?        // structured area definitions (polygons, bounding boxes, region codes, etc.)
+
+  // Tags relation (many-to-many)
+  tags Tag[] 
 
   // Regulatory ID Information
-  regulatoryId     String @unique // EIN for U.S., other IDs for international nonprofits
-  regulatoryIdType String // e.g., EIN, Charity Number
-  countryCode      String // ISO country code (e.g., US, GB)
+  regulatoryId     String? @unique // EIN for U.S., other IDs for international nonprofits
+  regulatoryIdType String? // e.g., EIN, Charity Number
+  countryCode      String? // ISO country code (e.g., US, GB)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -108,6 +137,18 @@ model OrgDetail {
   // Relations
   orgId Int       @unique
   organization   Organization @relation(fields: [orgId], references: [id])
+}
+
+model Tag {
+  id         Int      @id @default(autoincrement())
+  name       String
+  slug       String   @unique
+  icon       String?  // optional icon URL or identifier for UI
+  createdAt  DateTime @default(now())
+
+  organizations Organization[] // many-to-many back relation
+  @@map("Tag")
+  @@unique([name, slug])
 }
 
 model Fundraiser {
