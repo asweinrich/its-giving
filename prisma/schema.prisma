@@ -50,7 +50,7 @@ model User {
 enum Role {
   USER
   ADMIN
-  NONPROFIT_MANAGER
+  ORG_MANAGER
   DONOR
 }
 
@@ -69,14 +69,15 @@ model Account {
 }
 
 
-model Nonprofit {
+model Organization {
   id           Int     @id @default(autoincrement())
   name         String
   description  String?
+  type         String?
   category     String?
   websiteUrl   String?
   imageUrl     String?
-  contactEmail String? //For nonprofit verification, must match legitimate website url   
+  contactEmail String? //For organization verification, must match legitimate website url   
 
   // Regulatory ID Information
   regulatoryId     String @unique // EIN for U.S., other IDs for international nonprofits
@@ -90,13 +91,13 @@ model Nonprofit {
   fundraisers Fundraiser[]
   donations   Donation[]
 
-  detail             NonprofitDetail?
-  events             Event[] // Opposite relation for events associated with this nonprofit
-  payouts            Payout[] // Opposite relation for payouts to this nonprofit
-  recurringDonations RecurringDonation[] // Opposite relation for recurring donations to this nonprofit
+  detail             OrgDetail?
+  events             Event[] // Opposite relation for events associated with this organization
+  payouts            Payout[] // Opposite relation for payouts to this organization
+  recurringDonations RecurringDonation[] // Opposite relation for recurring donations to this organization
 }
 
-model NonprofitDetail {
+model OrgDetail {
   id             Int     @id @default(autoincrement())
   mission        String? // Mission statement or main goals
   history        String? // Background information
@@ -105,8 +106,8 @@ model NonprofitDetail {
   additionalInfo Json? // Catch-all for other content like FAQs, programs, etc.
 
   // Relations
-  nonprofitId Int       @unique
-  nonprofit   Nonprofit @relation(fields: [nonprofitId], references: [id])
+  orgId Int       @unique
+  organization   Organization @relation(fields: [orgId], references: [id])
 }
 
 model Fundraiser {
@@ -123,8 +124,8 @@ model Fundraiser {
   updatedAt DateTime @updatedAt
 
   // Relations
-  nonprofitId Int
-  nonprofit   Nonprofit @relation(fields: [nonprofitId], references: [id])
+  orgId Int
+  organization   Organization @relation(fields: [orgId], references: [id])
 
   creatorId Int // Primary creator (admin) of the fundraiser
   creator   User @relation(fields: [creatorId], references: [id])
@@ -156,11 +157,11 @@ model Donation {
   userId Int? // Foreign key to User (optional for anonymous donations)
   user   User? @relation(fields: [userId], references: [id])
 
-  fundraiserId Int? // Foreign key to Fundraiser (nullable for direct nonprofit donations)
+  fundraiserId Int? // Foreign key to Fundraiser (nullable for direct organization donations)
   fundraiser   Fundraiser? @relation(fields: [fundraiserId], references: [id])
 
-  nonprofitId Int // Foreign key to Nonprofit
-  nonprofit   Nonprofit @relation(fields: [nonprofitId], references: [id])
+  orgId Int // Foreign key to Organization
+  organization   Organization @relation(fields: [orgId], references: [id])
 
   events Event[] // Opposite relation for events related to this donation
 }
@@ -176,8 +177,8 @@ model Event {
   userId Int? // User who triggered the event
   user   User? @relation(fields: [userId], references: [id])
 
-  nonprofitId Int? // Associated nonprofit (if applicable)
-  nonprofit   Nonprofit? @relation(fields: [nonprofitId], references: [id])
+  orgId Int? // Associated organization (if applicable)
+  organization   Organization? @relation(fields: [orgId], references: [id])
 
   fundraiserId Int? // Associated fundraiser (if applicable)
   fundraiser   Fundraiser? @relation(fields: [fundraiserId], references: [id])
@@ -189,7 +190,7 @@ model Event {
 enum EventType {
   NEW_FUNDRAISER // When a new fundraiser is created
   DONATION // When a donation is made
-  NEW_NONPROFIT // When a new nonprofit is added
+  NEW_ORG // When a new ORG is added
   USER_JOINED // When a new user joins (optional, if desired for engagement)
   FUNDRAISER_COMPLETED // When a fundraiser reaches its goal or ends
 }
@@ -222,8 +223,8 @@ model Comment {
 model Payout {
   id Int @id @default(autoincrement())
 
-  nonprofitId Int // Nonprofit receiving the payout
-  nonprofit   Nonprofit @relation(fields: [nonprofitId], references: [id])
+  orgId Int // Organization receiving the payout
+  organization   Organization @relation(fields: [orgId], references: [id])
 
   amount        Float // Payout amount
   status        String  @default("pending") // Status (e.g., pending, completed, failed)
@@ -239,8 +240,8 @@ model RecurringDonation {
   userId Int // User making the recurring donation
   user   User @relation(fields: [userId], references: [id])
 
-  nonprofitId Int // Nonprofit receiving the recurring donation
-  nonprofit   Nonprofit @relation(fields: [nonprofitId], references: [id])
+  orgId Int // Organization receiving the recurring donation
+  organization   Organization @relation(fields: [orgId], references: [id])
 
   amount               Float // Donation amount per interval
   currency             String  @default("USD") // Currency code
