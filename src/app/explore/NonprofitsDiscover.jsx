@@ -1,7 +1,7 @@
 
 
 
-export default function NonprofitsDiscover() {
+export default function OrgsDiscover() {
 	
 
 	return (

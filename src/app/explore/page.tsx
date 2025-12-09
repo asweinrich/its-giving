@@ -1,4 +1,4 @@
-import NonprofitsDiscover from './NonprofitsDiscover';
+import OrgsDiscover from './OrgsDiscover';
 
 export default function Explore() {
 
@@ -10,10 +10,10 @@ export default function Explore() {
 	  </h1>
 
 	  <h2 className="text-lg border-b pb-1 mb-2">
-	  	Nonprofits
+	  	Orgs
 	  </h2>
 	  <div className="mb-4 overflow-x-scroll p-2 max-h-48 scrollbar-hide">
-	  	<NonprofitsDiscover />
+	  	<OrgsDiscover />
 	  </div>
 
 	  <h2 className="text-lg border-b pb-1 mb-2">

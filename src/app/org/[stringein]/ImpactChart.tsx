@@ -38,7 +38,7 @@ export default function ImpactChart({ filingsWithData }: ImpactChartProps) {
     return (
       <div className="bg-slate-800 rounded-lg p-4 shadow-md text-center">
         <h2 className="text-lg font-semibold text-white mb-4">Revenue Growth</h2>
-        <p className="text-slate-400">No financial data available for this nonprofit.</p>
+        <p className="text-slate-400">No financial data available for this organization.</p>
       </div>
     );
   }

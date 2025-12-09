@@ -13,7 +13,7 @@ const AboutText = ({ npid }: AboutTextProps) => {
   useEffect(() => {
     /* const fetchAboutText = async () => {
       try {
-        const response = await fetch(`/api/nonprofit/about?npid=${npid}`);
+        const response = await fetch(`/api/org/about?npid=${npid}`);
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
         }

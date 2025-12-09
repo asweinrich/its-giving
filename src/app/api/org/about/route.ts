@@ -10,16 +10,16 @@ export async function GET(request: Request) {
   }
 
   try {
-    const nonprofit = await prisma.nonprofit.findUnique({
+    const organization = await prisma.organization.findUnique({
       where: { regulatoryId: npid },
       select: { description: true },
     });
 
-    if (!nonprofit) {
-      return NextResponse.json({ error: "Nonprofit not found" }, { status: 404 });
+    if (!organization) {
+      return NextResponse.json({ error: "organization not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ about: nonprofit.description });
+    return NextResponse.json({ about: organization.description });
   } catch (error) {
     console.error("Error fetching about text:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
