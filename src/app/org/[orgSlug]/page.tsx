@@ -43,6 +43,9 @@ type NteeCodes = {
 
 const nteeCodesTyped: NteeCodes = nteeCodes; // Ensure TypeScript validation
 
+// EIN pattern for validating EIN format (XX-XXXXXXX)
+const EIN_PATTERN = /^\d{2}-\d{7}$/;
+
 type Filing = {
   tax_prd_yr: number;
   totrevenue?: number;
@@ -73,7 +76,7 @@ export default function OrgPage() {
         let response = await fetch(`/api/org/${slug}`);
         
         // If not found and slug looks like an EIN, try ProPublica API as fallback
-        if (!response.ok && slug && /^\d{2}-\d{7}$/.test(slug)) {
+        if (!response.ok && slug && EIN_PATTERN.test(slug)) {
           response = await fetch(`/api/org/propublica?ein=${slug}`);
         }
         
@@ -91,7 +94,8 @@ export default function OrgPage() {
     };
 
     if (orgSlug) fetchOrgData(); // Trigger fetch when slug is available
-  }, [orgSlug, normalizedSlug]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgSlug]); // normalizedSlug is derived from orgSlug, so only orgSlug is needed
 
   if (loading) {
     return <div className="text-center text-white">Loading organization data...</div>;
@@ -121,7 +125,7 @@ export default function OrgPage() {
   const fullAddress = [address, city, state, zipcode].filter(Boolean).join(', ');
 
   const getNteeDetails = (code: string | undefined) => {
-    if (!code) return { category: null, subcategory: null };
+    if (!code || code.length === 0) return { category: null, subcategory: null };
 
     const generalCategoryKey = code[0]; // First letter of the NTEE code
     const generalCategory = nteeCodesTyped[generalCategoryKey] || { title: "Unknown", subcategories: {} };

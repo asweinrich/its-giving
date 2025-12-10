@@ -40,7 +40,7 @@ export async function GET(request: Request, { params }: RouteParams) {
           propublicaData = await response.json();
         }
       } catch (error) {
-        console.log("ProPublica data not available:", error);
+        console.error("ProPublica data not available:", error);
         // Continue without ProPublica data
       }
     }
