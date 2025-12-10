@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation"; // For accessing [stringein] dynamically
+import { useParams } from "next/navigation"; // For accessing [orgSlug] dynamically
 import { CheckBadgeIcon } from "@heroicons/react/24/solid";
 import { LinkIcon } from "@heroicons/react/24/outline";
 import nteeCodes from "../../data/ntee_codes.json"; // Import the NTEE codes JSON
@@ -10,12 +10,21 @@ import ImpactTab from "./Impact";
 
 interface Organization {
   name: string;
+  slug?: string;
+  type?: string;
+  description?: string;
+  websiteUrl?: string;
+  instagram?: string;
+  tiktok?: string;
+  mission?: string;
   city?: string;
   state?: string;
   zipcode?: string;
-  address?: string;     // in case ProPublica sends a full combined address
+  address?: string;
   ntee_code?: string;
   ruling_date?: string;
+  regulatoryId?: string;
+  regulatoryIdType?: string;
 }
 
 interface OrgData {
@@ -34,6 +43,9 @@ type NteeCodes = {
 
 const nteeCodesTyped: NteeCodes = nteeCodes; // Ensure TypeScript validation
 
+// EIN pattern for validating EIN format (XX-XXXXXXX)
+const EIN_PATTERN = /^\d{2}-\d{7}$/;
+
 type Filing = {
   tax_prd_yr: number;
   totrevenue?: number;
@@ -43,18 +55,31 @@ type Filing = {
 };
 
 export default function OrgPage() {
-  const { stringein } = useParams(); // Extract EIN from URL
+  const { orgSlug } = useParams(); // Extract slug from URL
   const [orgData, setOrgData] = useState<OrgData | null>(null); // Store org data
   const [loading, setLoading] = useState(true); // Track loading state
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("about"); // Track active tab
 
+  // Normalize slug parameter (can be array or string)
+  const normalizedSlug = Array.isArray(orgSlug) ? orgSlug[0] : orgSlug;
+
   useEffect(() => {
-    // Fetch nonprofit data from ProPublica API
+    // Fetch organization data from API
     const fetchOrgData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/org/propublica?ein=${stringein}`);
+        // Support both slug-based and legacy EIN-based lookups
+        const slug = normalizedSlug;
+        
+        // Try slug-based lookup first
+        let response = await fetch(`/api/org/${slug}`);
+        
+        // If not found and slug looks like an EIN, try ProPublica API as fallback
+        if (!response.ok && slug && EIN_PATTERN.test(slug)) {
+          response = await fetch(`/api/org/propublica?ein=${slug}`);
+        }
+        
         if (!response.ok) {
           throw new Error(`Error fetching data: ${response.statusText}`);
         }
@@ -68,8 +93,9 @@ export default function OrgPage() {
       }
     };
 
-    if (stringein) fetchOrgData(); // Trigger fetch when EIN is available
-  }, [stringein]);
+    if (orgSlug) fetchOrgData(); // Trigger fetch when slug is available
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orgSlug]); // normalizedSlug is derived from orgSlug, so only orgSlug is needed
 
   if (loading) {
     return <div className="text-center text-white">Loading organization data...</div>;
@@ -80,14 +106,26 @@ export default function OrgPage() {
   }
 
   if (!orgData?.organization) {
-    return <div className="text-center text-white">No data available for this EIN.</div>;
+    return <div className="text-center text-white">No data available for this organization.</div>;
   }
 
-  const { name, city, state, ntee_code, ruling_date, zipcode, address } = orgData.organization;
+  const { 
+    name, 
+    slug, 
+    description, 
+    mission, 
+    websiteUrl, 
+    city, 
+    state, 
+    ntee_code, 
+    ruling_date, 
+    zipcode, 
+    address 
+  } = orgData.organization;
   const fullAddress = [address, city, state, zipcode].filter(Boolean).join(', ');
 
   const getNteeDetails = (code: string | undefined) => {
-    if (!code) return { category: "Unknown", subcategory: "Unknown" };
+    if (!code || code.length === 0) return { category: null, subcategory: null };
 
     const generalCategoryKey = code[0]; // First letter of the NTEE code
     const generalCategory = nteeCodesTyped[generalCategoryKey] || { title: "Unknown", subcategories: {} };
@@ -99,6 +137,9 @@ export default function OrgPage() {
     };
   };
   const { category, subcategory } = getNteeDetails(ntee_code);
+  
+  // Use mission from organization data if available, otherwise fall back to description
+  const displayMission = mission || description;
 
   const processFinancialData = (filingsWithData: Filing[]) => {
     if (!Array.isArray(filingsWithData) || filingsWithData.length === 0) {
@@ -141,19 +182,24 @@ export default function OrgPage() {
           {name}
           <CheckBadgeIcon className="w-5 h-5 inline ms-1 text-slate-400" />
         </h1>
-        <p className="px-2 text-slate-500 mb-2 pt-2">
-          @handlehere
-        </p>
-        <p className="mb-2 px-2 font-light md:text-lg max-w-4xl">
-          To empower underserved communities by providing access to education, healthcare, and sustainable
-          resources, fostering self-reliance and creating opportunities for a brighter future.
-        </p>
-        <p className="mb-6 pt-1 px-2 text-slate-400">
-          <a href="" className="opacity-100 hover:opacity-80">
-            <LinkIcon className="w-4 h-4 inline me-2 mb-0.5" />
-            https://itsgiving.org
-          </a>
-        </p>
+        {slug && (
+          <p className="px-2 text-slate-500 mb-2 pt-2">
+            @{slug}
+          </p>
+        )}
+        {displayMission && (
+          <p className="mb-2 px-2 font-light md:text-lg max-w-4xl">
+            {displayMission}
+          </p>
+        )}
+        {websiteUrl && (
+          <p className="mb-6 pt-1 px-2 text-slate-400">
+            <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="opacity-100 hover:opacity-80">
+              <LinkIcon className="w-4 h-4 inline me-2 mb-0.5" />
+              {websiteUrl}
+            </a>
+          </p>
+        )}
         <div className="flex justify-start border-b border-slate-700 overflow-x-scroll scrollbar-hide">
           <button
             className={`py-2 px-4 ${
@@ -195,14 +241,14 @@ export default function OrgPage() {
         <div className="mt-4 px-2">
           {activeTab === "about" && (
             <AboutTab
-              category={category || "Unknown"}
-              subcategory={subcategory || "Unknown"}
-              city={city || "Unknown"}
-              state={state || "Unknown"}
-              address={fullAddress || "Unknown"}
-              rulingDate={ruling_date || "Unknown"}
+              category={category}
+              subcategory={subcategory}
+              city={city}
+              state={state}
+              address={fullAddress}
+              rulingDate={ruling_date}
               financialRecords={financialRecords}
-              npid={Array.isArray(stringein) ? stringein[0] : stringein}
+              orgSlug={slug || normalizedSlug || ""}
             />
           )}
           {activeTab === "impact" && (

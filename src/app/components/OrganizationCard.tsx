@@ -12,6 +12,7 @@ export interface Tag {
 export interface Org {
   id: number;
   name: string;
+  slug?: string | null;
   regulatoryId?: string | null;
   type?: string | null;
   description?: string | null;
@@ -34,7 +35,12 @@ export default function OrganizationCard({ org }: { org: Org }) {
       .join("")
       .toUpperCase() || "ORG";
 
-  const orgLink = org.regulatoryId ? `/org/${encodeURIComponent(org.regulatoryId)}` : `/org/id/${org.id}`;
+  // Prefer slug, fall back to regulatoryId (EIN), then fall back to id-based path
+  const orgLink = org.slug 
+    ? `/org/${encodeURIComponent(org.slug)}` 
+    : org.regulatoryId 
+      ? `/org/${encodeURIComponent(org.regulatoryId)}` 
+      : `/org/id/${org.id}`;
 
   return (
     <div className="min-w-[260px] max-w-xs bg-slate-800 rounded-lg p-4 shadow hover:shadow-lg transition">

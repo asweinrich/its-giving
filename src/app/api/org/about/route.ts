@@ -3,15 +3,24 @@ import prisma from "@/lib/prisma";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const npid = searchParams.get("npid") || '00-0000000';
+  const slug = searchParams.get("slug");
+  const npid = searchParams.get("npid"); // Legacy support
 
-  if (!npid) {
-    return NextResponse.json({ error: "npid is required" }, { status: 400 });
+  const identifier = slug || npid;
+
+  if (!identifier) {
+    return NextResponse.json({ error: "slug or npid is required" }, { status: 400 });
   }
 
   try {
-    const organization = await prisma.organization.findUnique({
-      where: { regulatoryId: npid },
+    // Try to find organization by slug first, then by regulatoryId (npid)
+    const organization = await prisma.organization.findFirst({
+      where: {
+        OR: [
+          { slug: identifier },
+          { regulatoryId: identifier }
+        ]
+      },
       select: { description: true },
     });
 

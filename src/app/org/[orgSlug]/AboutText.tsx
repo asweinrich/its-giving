@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 
 interface AboutTextProps {
-  npid: string;
+  orgSlug: string;
 }
 
-const AboutText = ({ npid }: AboutTextProps) => {
+const AboutText = ({ orgSlug }: AboutTextProps) => {
   const [aboutText, setAboutText] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
 
 
   useEffect(() => {
-    /* const fetchAboutText = async () => {
+    const fetchAboutText = async () => {
       try {
-        const response = await fetch(`/api/org/about?npid=${npid}`);
+        const response = await fetch(`/api/org/about?slug=${orgSlug}`);
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
         }
@@ -27,11 +27,7 @@ const AboutText = ({ npid }: AboutTextProps) => {
     };
 
     fetchAboutText();
-    */
-
-    setAboutText('Test about Text')
-    setError(null)
-  }, [npid]);
+  }, [orgSlug]);
 
   if (error) {
     return <p className="text-red-500">{error}</p>;
