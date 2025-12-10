@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function GET(request: Request, { params }: RouteParams) {
-  const { slug } = params;
+  const { slug } = await params;
 
   if (!slug) {
     return NextResponse.json({ error: "slug is required" }, { status: 400 });
