@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { Geometry } from "geojson";
 
 type OrgType =
   | "NONPROFIT"
@@ -18,6 +19,42 @@ type ImpactScope =
   | "NATIONAL"
   | "INTERNATIONAL";
 
+type ImpactArea = {
+  type: string;
+  level?: string;
+  name?: string;
+  bbox?: number[];
+  geojson?: Geometry | null;
+};
+
+type CreateOrgResult = {
+  id: number;
+  name: string;
+  type: OrgType | null;
+  description: string | null;
+  websiteUrl: string | null;
+  instagram: string | null;
+  tiktok: string | null;
+  impactScope: ImpactScope | null;
+  impactAreas: ImpactArea[] | null;
+  tags: Array<{ id: number; name: string; slug: string }>;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type CreateOrgPayload = {
+  name: string;
+  type: OrgType | null;
+  description: string | null;
+  websiteUrl: string | null;
+  instagram: string | null;
+  tiktok: string | null;
+  socials: Record<string, string> | null;
+  impactScope: ImpactScope | null;
+  impactAreas: ImpactArea[] | null;
+  tags: string[];
+};
+
 export default function CreateOrgPage() {
   const [name, setName] = useState("");
   const [type, setType] = useState<OrgType | "">("");
@@ -27,12 +64,10 @@ export default function CreateOrgPage() {
   const [tiktok, setTiktok] = useState("");
   const [socials, setSocials] = useState<{ key: string; value: string }[]>([]);
   const [impactScope, setImpactScope] = useState<ImpactScope | "">("");
-  const [impactAreas, setImpactAreas] = useState<
-    { type: string; level?: string; name?: string; bbox?: number[]; geojson?: any }[]
-  >([]);
+  const [impactAreas, setImpactAreas] = useState<ImpactArea[]>([]);
   const [tagsInput, setTagsInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<any | null>(null);
+  const [result, setResult] = useState<CreateOrgResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // helpers
@@ -49,7 +84,7 @@ export default function CreateOrgPage() {
   const addNamedImpactArea = () => {
     setImpactAreas((a) => [...a, { type: "named", level: "city", name: "" }]);
   };
-  const updateImpactArea = (idx: number, patch: Partial<any>) => {
+  const updateImpactArea = (idx: number, patch: Partial<ImpactArea>) => {
     setImpactAreas((a) => a.map((it, i) => (i === idx ? { ...it, ...patch } : it)));
   };
   const removeImpactArea = (idx: number) => {
@@ -79,7 +114,7 @@ export default function CreateOrgPage() {
       if (s.key && s.value) socialsObj[s.key] = s.value;
     });
 
-    const payload: any = {
+    const payload: CreateOrgPayload = {
       name,
       type: type || null,
       description: description || null,
@@ -116,8 +151,8 @@ export default function CreateOrgPage() {
         setImpactAreas([]);
         setTagsInput("");
       }
-    } catch (err: any) {
-      setError(err?.message || "Network error");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Network error");
     } finally {
       setSubmitting(false);
     }
