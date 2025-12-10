@@ -58,19 +58,22 @@ export default function OrgPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("about"); // Track active tab
 
+  // Normalize slug parameter (can be array or string)
+  const normalizedSlug = Array.isArray(orgSlug) ? orgSlug[0] : orgSlug;
+
   useEffect(() => {
     // Fetch organization data from API
     const fetchOrgData = async () => {
       try {
         setLoading(true);
         // Support both slug-based and legacy EIN-based lookups
-        const slug = Array.isArray(orgSlug) ? orgSlug[0] : orgSlug;
+        const slug = normalizedSlug;
         
         // Try slug-based lookup first
         let response = await fetch(`/api/org/${slug}`);
         
         // If not found and slug looks like an EIN, try ProPublica API as fallback
-        if (!response.ok && /^\d{2}-\d{7}$/.test(slug)) {
+        if (!response.ok && slug && /^\d{2}-\d{7}$/.test(slug)) {
           response = await fetch(`/api/org/propublica?ein=${slug}`);
         }
         
@@ -88,7 +91,7 @@ export default function OrgPage() {
     };
 
     if (orgSlug) fetchOrgData(); // Trigger fetch when slug is available
-  }, [orgSlug]);
+  }, [orgSlug, normalizedSlug]);
 
   if (loading) {
     return <div className="text-center text-white">Loading organization data...</div>;
@@ -241,7 +244,7 @@ export default function OrgPage() {
               address={fullAddress}
               rulingDate={ruling_date}
               financialRecords={financialRecords}
-              orgSlug={slug || (Array.isArray(orgSlug) ? orgSlug[0] : orgSlug)}
+              orgSlug={slug || normalizedSlug || ""}
             />
           )}
           {activeTab === "impact" && (

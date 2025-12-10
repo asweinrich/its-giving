@@ -11,7 +11,7 @@ const AboutText = ({ orgSlug }: AboutTextProps) => {
 
 
   useEffect(() => {
-    /* const fetchAboutText = async () => {
+    const fetchAboutText = async () => {
       try {
         const response = await fetch(`/api/org/about?slug=${orgSlug}`);
         if (!response.ok) {
@@ -27,10 +27,6 @@ const AboutText = ({ orgSlug }: AboutTextProps) => {
     };
 
     fetchAboutText();
-    */
-
-    setAboutText('Test about Text')
-    setError(null)
   }, [orgSlug]);
 
   if (error) {
