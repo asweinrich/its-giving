@@ -90,6 +90,7 @@ model Account {
 model Organization {
   id           Int     @id @default(autoincrement())
   name         String
+  slug         String? @unique // Unique slug for URL-friendly organization identifier
   type         OrgType? // e.g., NONPROFIT, FOUNDATION...
   description  String?
   category     String?
@@ -133,6 +134,12 @@ model OrgDetail {
   impactStats    Json? // JSON to store structured data like impact numbers
   testimonials   Json? // JSON to store an array of testimonials
   additionalInfo Json? // Catch-all for other content like FAQs, programs, etc.
+  nteeCode       String? // NTEE classification code for nonprofits (optional for non-nonprofits)
+  rulingDate     String? // Ruling date for nonprofits (optional for non-nonprofits)
+  city           String? // City location
+  state          String? // State location
+  zipcode        String? // Zip code
+  address        String? // Full address
 
   // Relations
   orgId Int       @unique
