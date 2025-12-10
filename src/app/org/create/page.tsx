@@ -20,14 +20,14 @@ type ImpactScope =
 
 // GeoJSON type for polygon data
 interface GeoJSON {
-  type: string;
+  type: "Polygon" | "MultiPolygon";
   coordinates: number[][][] | number[][]; // Can be Polygon or MultiPolygon
   [key: string]: unknown;
 }
 
 // Impact Area type definition
 interface ImpactArea {
-  type: string;
+  type: "named" | "bbox" | "polygon";
   level?: string;
   name?: string;
   bbox?: number[];
@@ -316,7 +316,7 @@ export default function CreateOrgPage() {
                   <div className="flex gap-2 items-center mb-2">
                     <select
                       value={area.type}
-                      onChange={(e) => updateImpactArea(idx, { type: e.target.value })}
+                      onChange={(e) => updateImpactArea(idx, { type: e.target.value as ImpactArea["type"] })}
                       className="p-1 rounded bg-slate-800"
                     >
                       <option value="named">Named</option>
