@@ -210,7 +210,6 @@ export default function OrgPage() {
     ruling_date,
     zipcode,
     address,
-    verified,
   } = orgData.organization;
   const fullAddress = [address, city, state, zipcode].filter(Boolean).join(", ");
 
