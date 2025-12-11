@@ -70,20 +70,6 @@ const TYPE_LABELS: Record<string, string> = {
   OTHER: "Organization",
 };
 
-/**
- * Color palette per type. You can change these hex values to alter the verification icon color.
- * (Note: VerificationBadge has its own palette for standalone use; keep in sync if you want identical colors.)
- */
-const TYPE_COLORS: Record<string, string> = {
-  NONPROFIT: "#0ea5a4", // teal
-  FOUNDATION: "#7c3aed", // purple
-  GRASSROOTS: "#f59e0b", // amber
-  GOVERNMENTAL: "#ef4444", // red
-  FAITH_BASED: "#fb7185", // pink
-  PTA: "#06b6d4", // cyan
-  BUSINESS: "#3b82f6", // blue
-  OTHER: "#94a3b8", // slate
-};
 
 /** Derive a human label for given type key */
 function getTypeLabel(type?: string | null) {
@@ -91,11 +77,6 @@ function getTypeLabel(type?: string | null) {
   return TYPE_LABELS[type] ?? type;
 }
 
-/** Derive color for given type key */
-function getTypeColor(type?: string | null) {
-  if (!type) return TYPE_COLORS.OTHER;
-  return TYPE_COLORS[type] ?? TYPE_COLORS.OTHER;
-}
 
 /**
  * Small inline Instagram icon resembling Heroicons outline style.
@@ -271,7 +252,6 @@ export default function OrgPage() {
 
   // derive label + color for type display
   const typeLabel = getTypeLabel(type);
-  const typeColor = getTypeColor(type);
 
   const websiteHref = websiteUrl && websiteUrl.trim() ? websiteUrl.trim() : null;
   const instagramHref = normalizeSocialUrl("instagram", instagram);

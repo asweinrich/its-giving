@@ -35,7 +35,6 @@ export default function VerificationBadge({
 }) {
   const [verified, setVerified] = useState<boolean | null>(null);
   const [type, setType] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
 
   // Color palette per type (keep in sync with other usages)
   const TYPE_COLORS: Record<string, string> = {
@@ -59,7 +58,6 @@ export default function VerificationBadge({
     if (!orgSlug) return;
 
     const fetchOrg = async () => {
-      setLoading(true);
       try {
         const res = await fetch(`/api/org/${encodeURIComponent(orgSlug)}`);
         if (!res.ok) {
@@ -79,9 +77,7 @@ export default function VerificationBadge({
           setVerified(null);
           setType(null);
         }
-      } finally {
-        if (mounted) setLoading(false);
-      }
+      } 
     };
 
     fetchOrg();

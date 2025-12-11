@@ -81,10 +81,10 @@ function slugify(input: string) {
 }
 
 /** simple debounce */
-function debounce<T extends (...args: any[]) => void>(fn: T, wait = 200) {
-  let t: any;
+function debounce<T extends (...args: unknown[]) => void>(fn: T, wait = 200) {
+  let t: ReturnType<typeof setTimeout> | undefined;
   return (...args: Parameters<T>) => {
-    clearTimeout(t);
+    if (t !== undefined) clearTimeout(t);
     t = setTimeout(() => fn(...args), wait);
   };
 }
@@ -264,7 +264,7 @@ function TagInput({
         >
           {suggestions.length === 0 && query.trim() ? (
             <li className="px-3 py-2 text-sm text-slate-600">
-              No suggestions — press Enter to create "<strong>{query}</strong>"
+              press Enter to create <strong>{query}</strong>
             </li>
           ) : (
             suggestions.map((s, idx) => (
