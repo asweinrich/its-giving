@@ -97,7 +97,10 @@ export async function POST(req: NextRequest) {
       data.socials = body.socials as Prisma.InputJsonValue;
     }
     if (body.impactScope && typeof body.impactScope === "string") data.impactScope = body.impactScope;
-    if (Array.isArray(body.impactAreas) && body.impactAreas.length) data.impactAreas = body.impactAreas as any;
+    if (Array.isArray(body.impactAreas) && body.impactAreas.length) {
+      // Treat impactAreas as JSON-compatible data
+      data.impactAreas = body.impactAreas as Prisma.InputJsonValue;
+    }
 
     // --- TAGS: handle many-to-many relation via connectOrCreate ---
     // Expect body.tags to be an array of strings (tag names).
