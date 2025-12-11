@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Geometry } from "geojson";
 
 type OrgType =
@@ -27,9 +27,16 @@ type ImpactArea = {
   geojson?: Geometry | null;
 };
 
+type TagRecord = {
+  id?: number;
+  name: string;
+  slug?: string;
+};
+
 type CreateOrgResult = {
   id: number;
   name: string;
+  slug?: string | null;
   type: OrgType | null;
   description: string | null;
   websiteUrl: string | null;
@@ -44,6 +51,7 @@ type CreateOrgResult = {
 
 type CreateOrgPayload = {
   name: string;
+  slug?: string | null;
   type: OrgType | null;
   description: string | null;
   websiteUrl: string | null;
@@ -52,11 +60,239 @@ type CreateOrgPayload = {
   socials: Record<string, string> | null;
   impactScope: ImpactScope | null;
   impactAreas: ImpactArea[] | null;
-  tags: string[];
+  tags: string[]; // now an array of tag names
 };
+
+/**
+ * Normalize a string into a safe slug:
+ * - lowercases
+ * - strips invalid chars (keeps letters/numbers, hyphen, underscore, space)
+ * - collapses whitespace to single hyphen
+ * - collapses multiple hyphens and trims
+ */
+function slugify(input: string) {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\-_ \u00C0-\u017F]/g, "") // keep basic latin letters (with diacritics) and numbers, hyphen/underscore/space
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+/** simple debounce */
+function debounce<T extends (...args: any[]) => void>(fn: T, wait = 200) {
+  let t: any;
+  return (...args: Parameters<T>) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), wait);
+  };
+}
+
+/**
+ * TagInput component
+ * - tags: array of selected tag names
+ * - setTags: setter to update selected tags
+ *
+ * Behavior:
+ * - fetches existing tags from /api/tag on mount (expects [{name, slug}, ...])
+ * - filters suggestions client-side
+ * - keyboard support (up/down/enter/esc/backspace to remove last when input empty)
+ * - allows custom tags by pressing Enter when no suggestion selected
+ *
+ * Adjust the fetch endpoint if your API is different (e.g., /api/tags or /api/tag?search=)
+ */
+function TagInput({
+  tags,
+  setTags,
+}: {
+  tags: string[];
+  setTags: (v: string[]) => void;
+}) {
+  const [allTags, setAllTags] = useState<TagRecord[]>([]);
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const [highlightIndex, setHighlightIndex] = useState<number>(-1);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const listRef = useRef<HTMLUListElement | null>(null);
+
+  // fetch all tags once on mount
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        // Adjust this endpoint to your tags endpoint as needed.
+        // Expect JSON: [{ id, name, slug }, ...]
+        const res = await fetch("/api/tag");
+        if (!res.ok) return;
+        const json = (await res.json()) as TagRecord[];
+        if (mounted) setAllTags(json || []);
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // suggestions derived from allTags filtered by query and excluding selected tags
+  const suggestions = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) {
+      // show top N suggestions for inspiration (limit)
+      return allTags
+        .filter((t) => !tags.includes(t.name))
+        .slice(0, 8);
+    }
+    return allTags
+      .filter((t) => !tags.includes(t.name))
+      .filter(
+        (t) =>
+          t.name.toLowerCase().includes(q) ||
+          (t.slug && t.slug.toLowerCase().includes(q))
+      )
+      .slice(0, 8);
+  }, [allTags, query, tags]);
+
+  // keyboard navigation
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightIndex((i) => Math.min(i + 1, suggestions.length - 1));
+      setOpen(true);
+      return;
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightIndex((i) => Math.max(i - 1, 0));
+      return;
+    }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (highlightIndex >= 0 && highlightIndex < suggestions.length) {
+        selectSuggestion(suggestions[highlightIndex].name);
+      } else {
+        // add custom tag (if non-empty and not duplicate)
+        const cand = query.trim();
+        if (cand && !tags.includes(cand)) {
+          setTags([...tags, cand]);
+          setQuery("");
+          setOpen(false);
+        }
+      }
+      setHighlightIndex(-1);
+      return;
+    }
+    if (e.key === "Escape") {
+      setOpen(false);
+      setHighlightIndex(-1);
+      return;
+    }
+    if (e.key === "Backspace" && !query && tags.length) {
+      // remove last tag when input empty
+      setTags(tags.slice(0, tags.length - 1));
+    }
+  };
+
+  const selectSuggestion = (name: string) => {
+    if (!name || tags.includes(name)) return;
+    setTags([...tags, name]);
+    setQuery("");
+    setOpen(false);
+    setHighlightIndex(-1);
+    // focus input again
+    inputRef.current?.focus();
+  };
+
+  // keep suggestions open while typing; debounce not really necessary for client filtering,
+  // but we use debounce to toggle open state to avoid flicker if you later call server.
+  const debouncedSetQuery = useRef(
+    debounce((val: string) => {
+      setQuery(val);
+      setOpen(true);
+      setHighlightIndex(-1);
+    }, 120)
+  ).current;
+
+  return (
+    <div className="relative">
+      <label className="block font-medium">Tags</label>
+
+      <div
+        className="w-full mt-1 p-2 rounded border bg-slate-800 text-white flex flex-wrap gap-2 items-center"
+        onClick={() => inputRef.current?.focus()}
+      >
+        {tags.map((t, i) => (
+          <span
+            key={t + i}
+            className="inline-flex items-center gap-2 bg-slate-700 px-2 py-1 rounded-full text-sm"
+          >
+            <span>{t}</span>
+            <button
+              type="button"
+              onClick={() => setTags(tags.filter((x) => x !== t))}
+              className="ml-1 text-xs px-1 rounded bg-red-600"
+              aria-label={`Remove ${t}`}
+            >
+              ×
+            </button>
+          </span>
+        ))}
+
+        <input
+          ref={inputRef}
+          className="flex-1 min-w-[160px] bg-transparent outline-none text-white p-1"
+          placeholder="Type to add or choose from suggestions"
+          onChange={(e) => debouncedSetQuery(e.target.value)}
+          onKeyDown={onKeyDown}
+          onFocus={() => {
+            setOpen(true);
+            setHighlightIndex(-1);
+          }}
+          onBlur={() => {
+            // small timeout to allow click selection on suggestion before closing
+            setTimeout(() => setOpen(false), 150);
+          }}
+        />
+      </div>
+
+      {open && (suggestions.length > 0 || query.trim()) && (
+        <ul
+          ref={listRef}
+          className="absolute z-30 mt-1 w-full max-h-48 overflow-auto rounded border bg-white text-slate-900 shadow-lg"
+        >
+          {suggestions.length === 0 && query.trim() ? (
+            <li className="px-3 py-2 text-sm text-slate-600">
+              No suggestions — press Enter to create "<strong>{query}</strong>"
+            </li>
+          ) : (
+            suggestions.map((s, idx) => (
+              <li
+                key={s.name + idx}
+                onMouseDown={(e) => {
+                  // prevent blur before click
+                  e.preventDefault();
+                }}
+                onClick={() => selectSuggestion(s.name)}
+                className={`px-3 py-2 cursor-pointer text-sm flex items-center justify-between ${
+                  idx === highlightIndex ? "bg-slate-100" : ""
+                }`}
+              >
+                <span>{s.name}</span>
+                {s.slug && <span className="text-xs text-slate-500 ml-2">#{s.slug}</span>}
+              </li>
+            ))
+          )}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export default function CreateOrgPage() {
   const [name, setName] = useState("");
+  const [slug, setSlug] = useState(""); // optional manual slug input
   const [type, setType] = useState<OrgType | "">("");
   const [description, setDescription] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
@@ -65,12 +301,13 @@ export default function CreateOrgPage() {
   const [socials, setSocials] = useState<{ key: string; value: string }[]>([]);
   const [impactScope, setImpactScope] = useState<ImpactScope | "">("");
   const [impactAreas, setImpactAreas] = useState<ImpactArea[]>([]);
-  const [tagsInput, setTagsInput] = useState("");
+  // REPLACED: tagsInput string; now an array of tag names
+  const [tags, setTags] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<CreateOrgResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // helpers
+  // helpers for socials / impact areas (unchanged)
   const addSocial = () => {
     setSocials((s) => [...s, { key: "", value: "" }]);
   };
@@ -91,6 +328,16 @@ export default function CreateOrgPage() {
     setImpactAreas((a) => a.filter((_, i) => i !== idx));
   };
 
+  // preview slug
+  const previewSlug = useMemo(() => {
+    const source = slug.trim() || name;
+    return source ? slugify(source) : "";
+  }, [name, slug]);
+
+  const isValidSlug = (s: string) => {
+    return /^[a-z0-9\-_]+$/.test(s);
+  };
+
   const submit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     setError(null);
@@ -101,12 +348,13 @@ export default function CreateOrgPage() {
       return;
     }
 
-    setSubmitting(true);
+    const normalizedSlug = previewSlug || null;
+    if (normalizedSlug && !isValidSlug(normalizedSlug)) {
+      setError("Slug contains invalid characters after normalization. Please edit the name or custom slug.");
+      return;
+    }
 
-    const tags = tagsInput
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
+    setSubmitting(true);
 
     // build socials object (explicit instagram/tiktok + others)
     const socialsObj: Record<string, string> = {};
@@ -115,16 +363,17 @@ export default function CreateOrgPage() {
     });
 
     const payload: CreateOrgPayload = {
-      name,
-      type: type || null,
+      name: name.trim(),
+      slug: normalizedSlug,
+      type: (type as OrgType) || null,
       description: description || null,
       websiteUrl: websiteUrl || null,
       instagram: instagram || null,
       tiktok: tiktok || null,
       socials: Object.keys(socialsObj).length ? socialsObj : null,
-      impactScope: impactScope || null,
+      impactScope: (impactScope as ImpactScope) || null,
       impactAreas: impactAreas.length ? impactAreas : null,
-      tags,
+      tags, // <-- send selected tag names array
     };
 
     try {
@@ -136,11 +385,12 @@ export default function CreateOrgPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data?.error || "Server error");
+        setError(data?.message ?? data?.error ?? "Server error");
       } else {
         setResult(data);
-        // optionally reset form
+        // reset form on success
         setName("");
+        setSlug("");
         setType("");
         setDescription("");
         setWebsiteUrl("");
@@ -149,7 +399,7 @@ export default function CreateOrgPage() {
         setSocials([]);
         setImpactScope("");
         setImpactAreas([]);
-        setTagsInput("");
+        setTags([]); // clear tags
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Network error");
@@ -172,6 +422,25 @@ export default function CreateOrgPage() {
             placeholder="Organization name"
             required
           />
+        </div>
+
+        <div>
+          <label className="block font-medium">Slug (optional)</label>
+          <input
+            className="w-full mt-1 p-2 rounded border bg-slate-800 text-white"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            placeholder="custom-handle (optional) — leave blank to auto-generate from name"
+          />
+          <div className="text-sm text-slate-400 mt-1">
+            Preview: <span className="font-medium">{previewSlug || "—"}</span>
+            {previewSlug && !isValidSlug(previewSlug) && (
+              <span className="text-red-400 ml-2">Invalid characters in slug</span>
+            )}
+            <div className="text-xs text-slate-500 mt-1">
+              Allowed: lowercase letters, numbers, hyphen (-), underscore (_).
+            </div>
+          </div>
         </div>
 
         <div>
@@ -398,14 +667,19 @@ export default function CreateOrgPage() {
           </div>
         </div>
 
+        {/* NEW: TagInput */}
         <div>
-          <label className="block font-medium">Tags (comma-separated)</label>
-          <input
-            className="w-full mt-1 p-2 rounded border bg-slate-800 text-white"
-            value={tagsInput}
-            onChange={(e) => setTagsInput(e.target.value)}
-            placeholder="education, youth, environment"
-          />
+          <TagInput tags={tags} setTags={setTags} />
+          <div className="text-xs text-slate-500 mt-1">
+            Choose from suggestions or press Enter to create a new tag.
+          </div>
+        </div>
+
+        <div>
+          <label className="block font-medium">Tags (deprecated display)</label>
+          <div className="text-sm text-slate-400 mt-1">
+            Selected: {tags.length ? tags.join(", ") : "None"}
+          </div>
         </div>
 
         <div className="flex gap-2 items-center">
@@ -423,6 +697,7 @@ export default function CreateOrgPage() {
             onClick={() => {
               // quick reset
               setName("");
+              setSlug("");
               setType("");
               setDescription("");
               setWebsiteUrl("");
@@ -431,7 +706,7 @@ export default function CreateOrgPage() {
               setSocials([]);
               setImpactScope("");
               setImpactAreas([]);
-              setTagsInput("");
+              setTags([]);
               setError(null);
               setResult(null);
             }}
@@ -445,6 +720,15 @@ export default function CreateOrgPage() {
           <div className="mt-4 p-3 bg-slate-800 rounded">
             <h3 className="font-semibold">Created</h3>
             <pre className="text-sm max-h-48 overflow-auto">{JSON.stringify(result, null, 2)}</pre>
+            {result.slug ? (
+              <div className="mt-2">
+                <a className="text-blue-400 hover:underline" href={`/org/${result.slug}`}>
+                  View org — /org/{result.slug}
+                </a>
+              </div>
+            ) : (
+              <div className="mt-2 text-slate-400">No slug created for this org.</div>
+            )}
           </div>
         )}
       </form>
