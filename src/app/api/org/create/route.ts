@@ -71,7 +71,6 @@ const ALLOWED_ORG_TYPES = [
   "BUSINESS",
   "OTHER",
 ] as const;
-type AllowedOrgType = (typeof ALLOWED_ORG_TYPES)[number];
 
 export async function POST(req: NextRequest) {
   try {
