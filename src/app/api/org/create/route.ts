@@ -70,6 +70,7 @@ const ALLOWED_ORG_TYPES = [
   "BUSINESS",
   "OTHER",
 ] as const;
+type AllowedOrgType = (typeof ALLOWED_ORG_TYPES)[number];
 
 export async function POST(req: NextRequest) {
   try {
@@ -104,7 +105,6 @@ export async function POST(req: NextRequest) {
     if (body.type && typeof body.type === "string") {
       const t = body.type.trim();
       if ((ALLOWED_ORG_TYPES as readonly string[]).includes(t)) {
-        // Cast to the create input type (avoids a naked `any` while satisfying TS)
         data.type = t as Prisma.OrganizationCreateInput["type"];
       }
     }
@@ -113,7 +113,13 @@ export async function POST(req: NextRequest) {
     if (body.websiteUrl && typeof body.websiteUrl === "string") data.websiteUrl = body.websiteUrl;
     if (body.instagram && typeof body.instagram === "string") data.instagram = body.instagram;
     if (body.tiktok && typeof body.tiktok === "string") data.tiktok = body.tiktok;
-    if (body.impactScope && typeof body.impactScope === "string") data.impactScope = body.impactScope;
+
+    // Cast the incoming string to the Prisma enum type after verifying it's a string.
+    // Consider replacing this with runtime validation against an allowlist if you want stricter checks.
+    if (body.impactScope && typeof body.impactScope === "string") {
+      data.impactScope = body.impactScope as Prisma.OrganizationCreateInput["impactScope"];
+    }
+
     if (Array.isArray(body.impactAreas) && body.impactAreas.length) {
       // Treat impactAreas as JSON-compatible data
       data.impactAreas = body.impactAreas as Prisma.InputJsonValue;
