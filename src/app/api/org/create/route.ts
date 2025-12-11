@@ -58,6 +58,21 @@ async function ensureUniqueSlug(baseSlug: string | null): Promise<string | null>
   return candidate;
 }
 
+/** Allowed type keys must match your backend enum keys.
+ * Keep this in sync with TYPE_LABELS used in the UI.
+ */
+const ALLOWED_ORG_TYPES = [
+  "NONPROFIT",
+  "FOUNDATION",
+  "GRASSROOTS",
+  "GOVERNMENTAL",
+  "FAITH_BASED",
+  "PTA",
+  "BUSINESS",
+  "OTHER",
+] as const;
+type AllowedOrgType = (typeof ALLOWED_ORG_TYPES)[number];
+
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as OrgCreateBody;
@@ -87,7 +102,15 @@ export async function POST(req: NextRequest) {
       slug: uniqueSlug ?? undefined,
     };
 
-    if (body.type && typeof body.type === "string") data.type = body.type;
+    // Validate and assign `type` only if it's one of the allowed enum keys.
+    if (body.type && typeof body.type === "string") {
+      const t = body.type.trim();
+      if ((ALLOWED_ORG_TYPES as readonly string[]).includes(t)) {
+        // Cast to the create input type (avoids a naked `any` while satisfying TS)
+        data.type = t as Prisma.OrganizationCreateInput["type"];
+      }
+    }
+
     if (body.description && typeof body.description === "string") data.description = body.description;
     if (body.websiteUrl && typeof body.websiteUrl === "string") data.websiteUrl = body.websiteUrl;
     if (body.instagram && typeof body.instagram === "string") data.instagram = body.instagram;
