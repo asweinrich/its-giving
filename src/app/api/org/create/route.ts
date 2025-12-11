@@ -81,11 +81,10 @@ export async function POST(req: NextRequest) {
 
     const uniqueSlug = await ensureUniqueSlug(normalized);
 
-    // Build create payload - adapt field names to your Prisma schema as needed.
-    // We'll build a typed `data` object to pass into prisma.create. Important: tags must be nested create/connect format.
-    const data: Record<string, unknown> = {
+    // Build create payload using Prisma types. Use a Partial so we can progressively add fields.
+    const data: Partial<Prisma.OrganizationCreateInput> = {
       name,
-      slug: uniqueSlug,
+      slug: uniqueSlug ?? undefined,
     };
 
     if (body.type && typeof body.type === "string") data.type = body.type;
@@ -93,37 +92,40 @@ export async function POST(req: NextRequest) {
     if (body.websiteUrl && typeof body.websiteUrl === "string") data.websiteUrl = body.websiteUrl;
     if (body.instagram && typeof body.instagram === "string") data.instagram = body.instagram;
     if (body.tiktok && typeof body.tiktok === "string") data.tiktok = body.tiktok;
-    if (body.socials && typeof body.socials === "object") data.socials = body.socials;
+    if (body.socials && typeof body.socials === "object") {
+      // Prisma JSON field expects Prisma.InputJsonValue; runtime value is likely fine.
+      data.socials = body.socials as Prisma.InputJsonValue;
+    }
     if (body.impactScope && typeof body.impactScope === "string") data.impactScope = body.impactScope;
-    if (Array.isArray(body.impactAreas) && body.impactAreas.length) data.impactAreas = body.impactAreas;
+    if (Array.isArray(body.impactAreas) && body.impactAreas.length) data.impactAreas = body.impactAreas as any;
 
     // --- TAGS: handle many-to-many relation via connectOrCreate ---
     // Expect body.tags to be an array of strings (tag names).
     if (Array.isArray(body.tags) && body.tags.length) {
-      const rawTags = body.tags
+      const rawTags = (body.tags as unknown[])
         .map((t) => (typeof t === "string" ? t.trim() : String(t ?? "").trim()))
-        .filter(Boolean);
+        .filter(Boolean) as string[];
 
       if (rawTags.length) {
         // Map to connectOrCreate entries using slugified tag slugs.
         // NOTE: this assumes Tag model has a unique `slug` field. If your schema differs,
         // adjust `where` to match the unique field (e.g. { name: tagName }).
-        (data as any).tags = {
-          connectOrCreate: rawTags.map((tagName) => {
+        data.tags = {
+          connectOrCreate: rawTags.map((tagName: string) => {
             const tagSlug = slugify(tagName);
             return {
               where: { slug: tagSlug },
               create: { name: tagName, slug: tagSlug },
             };
           }),
-        };
+        } as Prisma.TagCreateNestedManyWithoutOrganizationsInput;
       }
     }
 
     // Attempt create. If slug uniqueness race occurs, catch and retry with a new unique slug.
     try {
       const created = await prisma.organization.create({
-        data,
+        data: data as Prisma.OrganizationCreateInput,
         include: { tags: true }, // include tags so client sees created/connected tags
       });
 
@@ -145,8 +147,11 @@ export async function POST(req: NextRequest) {
         if (!fallback) {
           return NextResponse.json({ message: "Unable to generate unique slug" }, { status: 500 });
         }
-        (data as any).slug = fallback;
-        const created = await prisma.organization.create({ data, include: { tags: true } });
+        data.slug = fallback;
+        const created = await prisma.organization.create({
+          data: data as Prisma.OrganizationCreateInput,
+          include: { tags: true },
+        });
         return NextResponse.json(
           {
             id: created.id,
