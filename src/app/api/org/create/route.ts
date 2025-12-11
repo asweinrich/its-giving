@@ -11,7 +11,6 @@ type OrgCreateBody = {
   websiteUrl?: unknown;
   instagram?: unknown;
   tiktok?: unknown;
-  socials?: unknown;
   impactScope?: unknown;
   impactAreas?: unknown;
   tags?: unknown; // expected: string[]
@@ -114,10 +113,6 @@ export async function POST(req: NextRequest) {
     if (body.websiteUrl && typeof body.websiteUrl === "string") data.websiteUrl = body.websiteUrl;
     if (body.instagram && typeof body.instagram === "string") data.instagram = body.instagram;
     if (body.tiktok && typeof body.tiktok === "string") data.tiktok = body.tiktok;
-    if (body.socials && typeof body.socials === "object") {
-      // Prisma JSON field expects Prisma.InputJsonValue; runtime value is likely fine.
-      data.socials = body.socials as Prisma.InputJsonValue;
-    }
     if (body.impactScope && typeof body.impactScope === "string") data.impactScope = body.impactScope;
     if (Array.isArray(body.impactAreas) && body.impactAreas.length) {
       // Treat impactAreas as JSON-compatible data

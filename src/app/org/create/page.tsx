@@ -57,7 +57,6 @@ type CreateOrgPayload = {
   websiteUrl: string | null;
   instagram: string | null;
   tiktok: string | null;
-  socials: Record<string, string> | null;
   impactScope: ImpactScope | null;
   impactAreas: ImpactArea[] | null;
   tags: string[]; // now an array of tag names
@@ -298,7 +297,6 @@ export default function CreateOrgPage() {
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [instagram, setInstagram] = useState("");
   const [tiktok, setTiktok] = useState("");
-  const [socials, setSocials] = useState<{ key: string; value: string }[]>([]);
   const [impactScope, setImpactScope] = useState<ImpactScope | "">("");
   const [impactAreas, setImpactAreas] = useState<ImpactArea[]>([]);
   // REPLACED: tagsInput string; now an array of tag names
@@ -307,16 +305,7 @@ export default function CreateOrgPage() {
   const [result, setResult] = useState<CreateOrgResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // helpers for socials / impact areas (unchanged)
-  const addSocial = () => {
-    setSocials((s) => [...s, { key: "", value: "" }]);
-  };
-  const updateSocial = (idx: number, key: string, value: string) => {
-    setSocials((s) => s.map((it, i) => (i === idx ? { key, value } : it)));
-  };
-  const removeSocial = (idx: number) => {
-    setSocials((s) => s.filter((_, i) => i !== idx));
-  };
+  // helpers for impact areas (unchanged)
 
   const addNamedImpactArea = () => {
     setImpactAreas((a) => [...a, { type: "named", level: "city", name: "" }]);
@@ -356,12 +345,7 @@ export default function CreateOrgPage() {
 
     setSubmitting(true);
 
-    // build socials object (explicit instagram/tiktok + others)
-    const socialsObj: Record<string, string> = {};
-    socials.forEach((s) => {
-      if (s.key && s.value) socialsObj[s.key] = s.value;
-    });
-
+  
     const payload: CreateOrgPayload = {
       name: name.trim(),
       slug: normalizedSlug,
@@ -370,7 +354,6 @@ export default function CreateOrgPage() {
       websiteUrl: websiteUrl || null,
       instagram: instagram || null,
       tiktok: tiktok || null,
-      socials: Object.keys(socialsObj).length ? socialsObj : null,
       impactScope: (impactScope as ImpactScope) || null,
       impactAreas: impactAreas.length ? impactAreas : null,
       tags, // <-- send selected tag names array
@@ -396,7 +379,6 @@ export default function CreateOrgPage() {
         setWebsiteUrl("");
         setInstagram("");
         setTiktok("");
-        setSocials([]);
         setImpactScope("");
         setImpactAreas([]);
         setTags([]); // clear tags
@@ -515,38 +497,6 @@ export default function CreateOrgPage() {
               onChange={(e) => setTiktok(e.target.value)}
               placeholder="@handle or full url"
             />
-          </div>
-        </div>
-
-        <div>
-          <label className="block font-medium">Other Socials</label>
-          <div className="space-y-2 mt-2">
-            {socials.map((s, i) => (
-              <div key={i} className="flex gap-2">
-                <input
-                  className="w-1/3 p-2 rounded border bg-slate-800 text-white"
-                  placeholder="network (facebook)"
-                  value={s.key}
-                  onChange={(e) => updateSocial(i, e.target.value, s.value)}
-                />
-                <input
-                  className="flex-1 p-2 rounded border bg-slate-800 text-white"
-                  placeholder="handle or url"
-                  value={s.value}
-                  onChange={(e) => updateSocial(i, s.key, e.target.value)}
-                />
-                <button
-                  type="button"
-                  className="px-3 rounded bg-red-600"
-                  onClick={() => removeSocial(i)}
-                >
-                  remove
-                </button>
-              </div>
-            ))}
-            <button type="button" className="mt-2 px-3 py-1 rounded bg-slate-700" onClick={addSocial}>
-              + Add social
-            </button>
           </div>
         </div>
 
@@ -703,7 +653,6 @@ export default function CreateOrgPage() {
               setWebsiteUrl("");
               setInstagram("");
               setTiktok("");
-              setSocials([]);
               setImpactScope("");
               setImpactAreas([]);
               setTags([]);
