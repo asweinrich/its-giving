@@ -91,18 +91,6 @@ export default function VerificationBadge({
 
   const color = getColorForType(type);
 
-  // helper to convert hex to rgb
-  const hexToRgb = (hex: string) => {
-    const cleaned = hex.replace('#', '');
-    const normalized = cleaned.length === 3 ? cleaned.split('').map(c => c + c).join('') : cleaned;
-    const bigint = parseInt(normalized, 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    return { r, g, b };
-  };
-  const { r, g, b } = hexToRgb(color);
-
 
   // size adjustments for icon rendering
   const iconSize = Math.round(size);
