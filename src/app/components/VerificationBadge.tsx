@@ -103,8 +103,6 @@ export default function VerificationBadge({
   };
   const { r, g, b } = hexToRgb(color);
 
-  // background circle for verified badge (subtle)
-  const verifiedBg = `rgba(${r}, ${g}, ${b}, 0.16)`;
 
   // size adjustments for icon rendering
   const iconSize = Math.round(size);

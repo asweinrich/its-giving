@@ -5,7 +5,6 @@ import { useParams } from "next/navigation"; // For accessing [orgSlug] dynamica
 import { LinkIcon } from "@heroicons/react/24/outline";
 import nteeCodes from "../../data/ntee_codes.json"; // Import the NTEE codes JSON
 import AboutTab from "./About";
-import ImpactTab from "./Impact";
 import VerificationBadge from "../../components/VerificationBadge";
 
 interface Organization {
@@ -344,11 +343,11 @@ export default function OrgPage() {
           </button>
           <button
             className={`py-2 px-4 ${
-              activeTab === "impact" ? "border-b-2 border-green-500 text-green-500" : "border-b-2 border-slate-700 text-slate-400"
+              activeTab === "resources" ? "border-b-2 border-green-500 text-green-500" : "border-b-2 border-slate-700 text-slate-400"
             }`}
-            onClick={() => setActiveTab("impact")}
+            onClick={() => setActiveTab("resources")}
           >
-            Impact
+            Resources
           </button>
           <button
             className={`py-2 px-4 ${
@@ -366,6 +365,14 @@ export default function OrgPage() {
           >
             Fundraisers
           </button>
+          <button
+            className={`py-2 px-4 ${
+              activeTab === "support" ? "border-b-2 border-green-500 text-green-500" : "border-b-2 border-slate-700 text-slate-400"
+            }`}
+            onClick={() => setActiveTab("support")}
+          >
+            Support
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -382,7 +389,21 @@ export default function OrgPage() {
               orgSlug={slug || normalizedSlug || ""}
             />
           )}
-          {activeTab === "impact" && <ImpactTab address={fullAddress} />}
+
+          {activeTab === "resources" && (
+            <div className="bg-slate-800 rounded p-4">
+              <h2 className="text-lg font-semibold mb-2">Resources</h2>
+              <p className="text-slate-300">Resources content coming soon — this tab will show how to receive help from this organization.</p>
+            </div>
+          )}
+
+          {activeTab === "support" && (
+            <div className="bg-slate-800 rounded p-4">
+              <h2 className="text-lg font-semibold mb-2">Support</h2>
+              <p className="text-slate-300">Support options coming soon — people will be able to donate, volunteer, or otherwise support this organization here.</p>
+            </div>
+          )}
+
         </div>
       </div>
     </div>
