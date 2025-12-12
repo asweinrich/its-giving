@@ -127,8 +127,6 @@ export default function VerificationBadge({
           style={{
             width: iconSize,
             height: iconSize,
-            borderRadius: 9999,
-            background: verifiedBg,
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
