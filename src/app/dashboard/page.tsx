@@ -24,7 +24,6 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (user?.userId) {
-      setUserId(user.userId);
       console.log("userId: ", user.userId);
     } else if (user) {
       console.warn("userId is missing in the user object:", user);
