@@ -1,51 +1,72 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext"; // Import the AuthContext
-
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setAuthenticated } = useAuth(); // Access setAuthenticated from context
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+
+  const { status } = useSession();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  // If already logged in, don't stay on /log-in (prevents loops)
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace(callbackUrl);
+    }
+  }, [status, callbackUrl, router]);
+
+  const handleCredentialsLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
-    try {
-      const response = await fetch("/api/users/log-in", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+    const res = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+      callbackUrl,
+    });
 
-      const data = await response.json();
+    if (!res) return setError("Login failed.");
 
-      if (response.ok) {
-        setAuthenticated(true, { userId: data.user_id, email }); // Update AuthContext
-        // Redirect to the dashboard after successful login
-        router.push(`/dashboard`);
-      } else {
-        setError(data.error || "Login failed. Please check your credentials.");
-      }
-    } catch (err) {
-      console.log(err)
-      setError("An error occurred. Please try again.");
-    } finally {
-      setLoading(false);
+    if (res.error) {
+      console.log("NextAuth signIn error:", res.error);
+      return setError(res.error); // e.g. "CredentialsSignin"
     }
+
+    setLoading(false);
+   
+    router.push(callbackUrl);
+  };
+
+  const handleGoogleLogin = async () => {
+    // let NextAuth handle redirect for OAuth
+    await signIn("google", { callbackUrl });
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-800 text-slate-100">
-      <div className="w-full max-w-md p-6 bg-slate-700 rounded-lg shadow-lg">
-        <h1 className="text-xl font-semibold text-center mb-6">Login</h1>
-        <form onSubmit={handleLogin} className="space-y-4">
+      <div className="w-full max-w-md p-6 bg-slate-700 rounded-lg shadow-lg space-y-4">
+        <h1 className="text-xl font-semibold text-center">Login</h1>
+
+        <button
+          onClick={handleGoogleLogin}
+          className="w-full py-2 bg-white text-black rounded"
+        >
+          Continue with Google
+        </button>
+
+        <div className="text-center text-sm text-slate-300">or</div>
+
+        <form onSubmit={handleCredentialsLogin} className="space-y-3">
           <input
             type="email"
             placeholder="Email"
@@ -62,7 +83,9 @@ export default function LoginPage() {
             required
             className="w-full p-2 rounded bg-slate-600 text-slate-100"
           />
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+
+          {error && <p className="text-red-400 text-sm">{error}</p>}
+
           <button
             type="submit"
             disabled={loading}

@@ -95,6 +95,8 @@ model Organization {
   description  String?
   category     String?
   websiteUrl   String?
+  brandColor   String?
+  founded      DateTime?
   // Socials - explicit fields for common channels + flexible JSON for others
   instagram    String?   // store handle or full URL
   tiktok       String?

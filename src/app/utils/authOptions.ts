@@ -20,6 +20,9 @@ declare module "next-auth" {
 }
 
 export const authOptions: NextAuthOptions = {
+  pages: {
+    signIn: "/log-in",
+  },
   providers: [
     // Google Sign-In
     GoogleProvider({
@@ -74,20 +77,20 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async signIn({ user, account }) {
-      if (account.provider === 'google') {
+      if (account?.provider === "google") {
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email },
         });
 
-        // If the Google user doesn't have a username, redirect to setup
         if (dbUser && !dbUser.username) {
-          return `/dashboard/setup`; // Redirect new Google users to the setup page
+          // Returning a string here can be okay, but let's avoid it while debugging loops.
+          // We'll redirect after login in the app instead.
+          return true;
         }
-      } else if (!user.emailVerified) {
-        // For email/password users, ensure email is verified before sign-in
-        return `/dashboard/setup`; // Prevent full access sign-in if email not verified
       }
-      return true; // Proceed with sign-in if all is well
+
+      // IMPORTANT: don't return a redirect string for credentials here
+      return true;
     },
   },
 };

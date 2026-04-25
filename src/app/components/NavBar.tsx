@@ -2,14 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import Link from 'next/link';
-
+import { signOut, useSession } from "next-auth/react";
 
 export default function NavBar() {
   const router = useRouter();
-  const { isAuthenticated, user, setAuthenticated } = useAuth();
+
+  // NextAuth session (replaces AuthContext)
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated";
+
   const [showMenu, setShowMenu] = useState(false); // For collapsible menu
   const [showUserDropdown, setShowUserDropdown] = useState(false); // For user widget dropdown
   const [darkMode, setDarkMode] = useState(false);
@@ -25,13 +28,20 @@ export default function NavBar() {
 
   const handleSignOut = async () => {
     try {
-      await fetch("/api/users/log-out", { method: "GET" });
-      setAuthenticated(false); // Update context
-      router.push("/log-in"); // Redirect to login page after signing out
+      // NextAuth sign out (replaces /api/users/log-out + AuthContext updates)
+      await signOut({ callbackUrl: "/log-in" });
+
+      // Optional: if you want a hard nav in case callbackUrl handling ever changes
+      router.push("/log-in");
     } catch (error) {
       console.error("Sign-out error:", error);
     }
   };
+
+  const userLabel =
+    session?.user?.email ||
+    session?.user?.name ||
+    "User";
 
   return (
     <div className="w-full">
@@ -52,7 +62,7 @@ export default function NavBar() {
                   className="flex items-center space-x-2 bg-slate-800 p-2 rounded-lg text-white"
                 >
                   <div className="w-8 h-8 bg-slate-600 rounded-full"></div>
-                  <span>{user?.email || "User"}</span>
+                  <span>{userLabel}</span>
                 </button>
 
                 {showUserDropdown && (
@@ -117,6 +127,7 @@ export default function NavBar() {
                 </div>
               )}
             </div>
+
           </div>
         </div>
       </div>

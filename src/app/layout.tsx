@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import './styles/custom-tailwind.css'; /* Import custom utilities */
-import { Inter } from 'next/font/google';
-import NavBar from './components/NavBar';
-import { AuthProvider } from "@/context/AuthContext"; // Import AuthProvider
+import "./styles/custom-tailwind.css";
+import { Inter } from "next/font/google";
+import NavBar from "./components/NavBar";
+import { AuthProvider } from "@/context/AuthContext";
+import Providers from "./providers";
 
-
-
-
-// Import multiple font weights here
 const inter = Inter({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'], // Add only the weights you want
-  variable: '--font-inter',
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -27,14 +24,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-
-      <body
-        className={inter.variable+' font-sans'}
-      >
-        <AuthProvider>
-          <NavBar />
-          {children}
-        </AuthProvider>
+      <body className={inter.variable + " font-sans"}>
+        <Providers>
+          <AuthProvider>
+            <NavBar />
+            {children}
+          </AuthProvider>
+        </Providers>
       </body>
     </html>
   );
