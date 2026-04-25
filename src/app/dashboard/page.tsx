@@ -19,7 +19,6 @@ interface User {
 export default function DashboardPage() {
   const [activeSection, setActiveSection] = useState("Home");
   const { user }: { user: User | null } = useAuth();
-  const [userId, setUserId] = useState<string | null>(null);
 
   const isAdmin = user?.email?.toLowerCase() === "asweinrich@gmail.com";
 
