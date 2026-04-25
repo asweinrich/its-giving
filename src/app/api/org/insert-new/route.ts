@@ -45,8 +45,10 @@ export async function POST(req: NextRequest) {
     const hqAddress = body?.hqAddress ? String(body.hqAddress).trim() : null;
 
     const tagNamesOrSlugs: string[] = Array.isArray(body?.tagNamesOrSlugs)
-      ? body.tagNamesOrSlugs.map((t: any) => String(t).trim()).filter(Boolean)
-      : [];
+    ? (body.tagNamesOrSlugs as unknown[])
+        .map((t) => String(t).trim())
+        .filter(Boolean)
+    : [];
 
     // validation
     if (!name) return NextResponse.json({ message: "Name is required" }, { status: 400 });
@@ -68,7 +70,7 @@ export async function POST(req: NextRequest) {
     const regulatoryIdType = needsEin && ein ? "EIN" : null;
 
     // upsert tags + connect
-    const tags = await Promise.all(
+    const tags: Array<{ id: number } | null> = await Promise.all(
       tagNamesOrSlugs.map(async (raw) => {
         const tagSlug = slugify(raw);
         if (!tagSlug) return null;
@@ -82,7 +84,9 @@ export async function POST(req: NextRequest) {
       })
     );
 
-    const tagConnect = tags.filter(Boolean).map((t: any) => ({ id: t.id }));
+    const tagConnect = tags
+      .filter((t): t is { id: number } => t !== null)
+      .map((t) => ({ id: t.id }));
 
     const created = await prisma.organization.create({
       data: {
@@ -116,9 +120,10 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ ok: true, id: created.id, slug: created.slug });
-  } catch (err: any) {
-    // handle unique slug collision nicely
-    const message = String(err?.message || "");
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : typeof err === "string" ? err : "";
+
     if (message.includes("Unique constraint") || message.includes("unique")) {
       return NextResponse.json({ message: "Slug already exists. Please choose another." }, { status: 409 });
     }

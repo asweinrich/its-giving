@@ -49,6 +49,10 @@ const CATEGORIES = [
   "Women & Gender Equity",
 ] as const;
 
+type Category = (typeof CATEGORIES)[number];
+type OrgType = (typeof ORG_TYPES)[number];
+type ImpactScope = (typeof IMPACT_SCOPES)[number];
+
 type Tag = { id: number; name: string; slug: string };
 
 function dateOnlyToNoonUTC(dateOnly: string): string {
@@ -238,8 +242,10 @@ export default function AddOrgForm() {
       // you can redirect to the org page later; for now go to explore or dashboard
       router.push(`/org/${encodeURIComponent(payload.slug)}`);
       router.refresh();
-    } catch (err: any) {
-      setError(err?.message || "Something went wrong");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : typeof err === "string" ? err : null;
+      setError(message || "Something went wrong");
     } finally {
       setSubmitting(false);
     }
@@ -337,7 +343,7 @@ export default function AddOrgForm() {
           <label className="block text-sm mb-1">Category *</label>
           <select
             value={category}
-            onChange={(e) => setCategory(e.target.value as any)}
+            onChange={(e) => setCategory(e.target.value as Category | "")}
             className="w-full p-2 rounded bg-slate-700 text-slate-100"
           >
             <option value="">Select a category</option>
@@ -351,7 +357,7 @@ export default function AddOrgForm() {
           <label className="block text-sm mb-1">Type *</label>
           <select
             value={type}
-            onChange={(e) => setType(e.target.value as any)}
+            onChange={(e) => setType(e.target.value as OrgType | "")}
             className="w-full p-2 rounded bg-slate-700 text-slate-100"
           >
             <option value="">Select a type</option>
@@ -378,7 +384,7 @@ export default function AddOrgForm() {
           <label className="block text-sm mb-1">Service scope *</label>
           <select
             value={impactScope}
-            onChange={(e) => setImpactScope(e.target.value as any)}
+            onChange={(e) => setImpactScope(e.target.value as ImpactScope | "")}
             className="w-full p-2 rounded bg-slate-700 text-slate-100"
           >
             <option value="">Select scope</option>
