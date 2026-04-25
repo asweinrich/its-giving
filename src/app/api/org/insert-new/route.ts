@@ -6,9 +6,18 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/utils/authOptions";
 import prisma from "@/lib/prisma";
 import { slugify } from "@/lib/slugify";
+import { OrgType, ImpactScope } from "@prisma/client";
 
 function isValidHexColor(value: string): boolean {
   return /^#[0-9a-fA-F]{6}$/.test(value);
+}
+
+function isOrgType(value: string): value is OrgType {
+  return Object.values(OrgType).includes(value as OrgType);
+}
+
+function isImpactScope(value: string): value is ImpactScope {
+  return Object.values(ImpactScope).includes(value as ImpactScope);
 }
 
 export async function POST(req: NextRequest) {
@@ -17,6 +26,8 @@ export async function POST(req: NextRequest) {
   if (!session || email !== "asweinrich@gmail.com") {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });
   }
+
+
 
   try {
     const body = await req.json();
@@ -33,8 +44,22 @@ export async function POST(req: NextRequest) {
     const tiktok = body?.tiktok ? String(body.tiktok).trim() : null;
 
     const category = String(body?.category ?? "").trim();
-    const type = String(body?.type ?? "").trim();
-    const impactScope = String(body?.impactScope ?? "").trim();
+   
+
+    const typeRaw = String(body?.type ?? "").trim();
+    const impactScopeRaw = String(body?.impactScope ?? "").trim();
+
+    if (!isOrgType(typeRaw)) {
+      return NextResponse.json({ message: "Type is invalid" }, { status: 400 });
+    }
+    if (!isImpactScope(impactScopeRaw)) {
+      return NextResponse.json({ message: "Service scope is invalid" }, { status: 400 });
+    }
+
+    
+
+    const type = typeRaw; // now typed as OrgType
+    const impactScope = impactScopeRaw; // now typed as ImpactScope
 
     const foundedStr = String(body?.founded ?? "").trim(); // ISO string
     const founded = foundedStr ? new Date(foundedStr) : null;
