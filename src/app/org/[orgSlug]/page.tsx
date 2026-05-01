@@ -324,7 +324,7 @@ export default function OrgPage() {
                 className="opacity-100 hover:opacity-80 flex items-center"
               >
                 <InstagramIcon />
-                <span className="truncate max-w-xl">@{socialDisplayText(instagram)}</span>
+                <span className="truncate max-w-xl">{socialDisplayText(instagram)}</span>
               </a>
             </p>
           )}
@@ -338,7 +338,7 @@ export default function OrgPage() {
                 className="opacity-100 hover:opacity-80 inline-flex items-center"
               >
                 <TikTokIcon />
-                <span className="truncate max-w-xl">@{socialDisplayText(tiktok)}</span>
+                <span className="truncate max-w-xl">{socialDisplayText(tiktok)}</span>
               </a>
             </p>
           )}

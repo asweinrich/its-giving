@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MAP_DEFAULT_STYLE } from "@/config/mapStyle";
+import { SERVICE_AREA_OPTIONS } from "@/app/data/serviceAreas";
 
 type AreaType = "NEIGHBORHOOD" | "CITY" | "COUNTY" | "STATE" | "COUNTRY";
 
@@ -18,13 +19,20 @@ interface ServiceAreaMapProps {
   serviceAreas: ServiceArea[];
 }
 
-const SKIP_POLYGON_TYPES: AreaType[] = ["COUNTRY"];
+const SKIP_POLYGON_TYPES: AreaType[] = [];
 
 async function fetchBoundary(area: ServiceArea): Promise<GeoJSON.Feature | null> {
   if (SKIP_POLYGON_TYPES.includes(area.type)) return null;
   try {
     const params = new URLSearchParams({ value: area.value, type: area.type });
     if (area.placeId) params.set("placeId", area.placeId);
+
+    // Look up region from static data and pass it for neighborhood context
+    const staticMatch = SERVICE_AREA_OPTIONS.find(
+      (o) => o.value === area.value && o.type === area.type
+    );
+    if (staticMatch?.region) params.set("region", staticMatch.region);
+
     const res = await fetch(`/api/boundaries?${params}`);
     if (!res.ok) return null;
     return await res.json();
@@ -63,7 +71,7 @@ export default function ServiceAreaMap({ serviceAreas }: ServiceAreaMapProps) {
       style: MAP_DEFAULT_STYLE,
       center: [-98.5795, 39.8283],
       zoom: 4,
-      interactive: false, // static — no pan, zoom, or rotate
+      interactive: false,
     });
 
     map.on("error", (e) => {
@@ -92,21 +100,18 @@ export default function ServiceAreaMap({ serviceAreas }: ServiceAreaMapProps) {
             [Math.min(...lngs), Math.min(...lats)],
             [Math.max(...lngs), Math.max(...lats)]
           ),
-          { padding: 48, maxZoom: 13, duration: 0 }
+          { padding: 48, maxZoom: 14, duration: 0 }
         );
       }
 
       const geojson: GeoJSON.FeatureCollection = { type: "FeatureCollection", features };
-
       map.addSource("service-areas", { type: "geojson", data: geojson });
-
       map.addLayer({
         id: "service-areas-fill",
         type: "fill",
         source: "service-areas",
         paint: { "fill-color": "#22c55e", "fill-opacity": 0.15 },
       });
-
       map.addLayer({
         id: "service-areas-border",
         type: "line",
@@ -149,7 +154,7 @@ export default function ServiceAreaMap({ serviceAreas }: ServiceAreaMapProps) {
           borderRadius: "16px",
           overflow: "hidden",
           boxShadow: "0 0 16px #222",
-          cursor: "default", // no pointer cursor either
+          cursor: "default",
         }}
       />
     </div>
