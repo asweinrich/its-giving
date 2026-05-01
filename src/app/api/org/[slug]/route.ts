@@ -15,12 +15,14 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 
   try {
-    // Try to find organization by slug
     const organization = await prisma.organization.findUnique({
       where: { slug },
       include: {
         detail: true,
         tags: true,
+        serviceAreas: {
+          orderBy: [{ type: "asc" }, { value: "asc" }],
+        },
       },
     });
 
@@ -28,8 +30,6 @@ export async function GET(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "Organization not found" }, { status: 404 });
     }
 
-    // Transform the data to match the expected format
-    // If this is a nonprofit with an EIN, we can optionally fetch ProPublica data
     let propublicaData = null;
     if (organization.regulatoryId && organization.type === "NONPROFIT") {
       try {
@@ -41,11 +41,9 @@ export async function GET(request: Request, { params }: RouteParams) {
         }
       } catch (error) {
         console.error("ProPublica data not available:", error);
-        // Continue without ProPublica data
       }
     }
 
-    // Build response combining database and optional ProPublica data
     const responseData = {
       organization: {
         name: organization.name,
@@ -65,6 +63,7 @@ export async function GET(request: Request, { params }: RouteParams) {
         regulatoryId: organization.regulatoryId,
         regulatoryIdType: organization.regulatoryIdType,
       },
+      serviceAreas: organization.serviceAreas,
       filings_with_data: propublicaData?.filings_with_data || [],
       detail: organization.detail,
       tags: organization.tags,

@@ -1,5 +1,6 @@
-// Centralize your map style
-export const MAP_DEFAULT_STYLE = "https://demotiles.maplibre.org/style.json"; // Or your own Mapbox style URL
+// MapLibre GL is free — but needs a tile provider for map imagery.
+// We use MapTiler (you already have an API key).
+export const MAP_DEFAULT_STYLE = `https://api.maptiler.com/maps/streets-v2/style.json?key=M3yBnB3aobawvcom6881`;
 
 // General options for all maps
 export const MAP_DEFAULT_OPTIONS = {
@@ -11,5 +12,4 @@ export const MAP_DEFAULT_OPTIONS = {
   markerColor: "#38a169",
   markerPopupBg: "bg-slate-900",
   markerPopupTextColor: "text-green-400",
-  // Add more as needed!
 };

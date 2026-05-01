@@ -7,6 +7,15 @@ import nteeCodes from "../../data/ntee_codes.json"; // Import the NTEE codes JSO
 import AboutTab from "./About";
 import VerificationBadge from "../../components/VerificationBadge";
 
+type AreaType = 'NEIGHBORHOOD' | 'CITY' | 'COUNTY' | 'STATE' | 'COUNTRY'
+
+interface ServiceArea {
+  id: number
+  type: AreaType
+  value: string
+  placeId: string | null
+}
+
 interface Organization {
   name: string;
   slug?: string;
@@ -24,11 +33,12 @@ interface Organization {
   ruling_date?: string;
   regulatoryId?: string;
   regulatoryIdType?: string;
-  verified?: boolean; // optional verification flag
+  verified?: boolean;
 }
 
 interface OrgData {
   organization: Organization;
+  serviceAreas?: ServiceArea[];   // ← add this
   filings_with_data?: Filing[];
 }
 
@@ -255,6 +265,8 @@ export default function OrgPage() {
   const instagramHref = normalizeSocialUrl("instagram", instagram);
   const tiktokHref = normalizeSocialUrl("tiktok", tiktok);
 
+  const serviceAreas = orgData?.serviceAreas ?? [];
+
   return (
     <div className="min-h-screen bg-slate-900 text-white max-w-5xl mx-auto rounded-2xl mt-6 overflow-hidden">
       {/* Header Section */}
@@ -332,6 +344,25 @@ export default function OrgPage() {
           )}
         </div>
 
+        {/* Service Areas */}
+        {serviceAreas.length > 0 && (
+          <div className="mb-4 mt-1 px-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
+              Serves
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {serviceAreas.map((area) => (
+                <span
+                  key={area.id}
+                  className="inline-block rounded-full bg-slate-800 border border-slate-700 px-3 py-0.5 text-sm text-slate-300"
+                >
+                  {area.value}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-start border-b border-slate-700 overflow-x-scroll scrollbar-hide">
           <button
             className={`py-2 px-4 ${
@@ -387,6 +418,7 @@ export default function OrgPage() {
               rulingDate={ruling_date}
               financialRecords={financialRecords}
               orgSlug={slug || normalizedSlug || ""}
+              serviceAreas={serviceAreas}   // ← add this
             />
           )}
 
