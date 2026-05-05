@@ -41,6 +41,8 @@ export async function GET(req: NextRequest) {
         id: true,
         name: true,
         slug: true,
+        emoji: true,
+        color: true,
       },
     });
 
@@ -53,8 +55,8 @@ export async function GET(req: NextRequest) {
 
 /**
  * POST /api/tag
- * Body: { name: string }
- * Creates tag if missing; returns { id, name, slug }
+ * Body: { name: string, emoji?: string, color?: string }
+ * Creates tag if missing; returns { id, name, slug, emoji, color }
  */
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -75,11 +77,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Invalid tag name" }, { status: 400 });
     }
 
+    const emoji = body?.emoji ? String(body.emoji).trim() : undefined;
+    const color = body?.color ? String(body.color).trim() : undefined;
+
+    // Validate hex color if provided
+    if (color && !/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(color)) {
+      return NextResponse.json({ message: "Color must be a valid hex (e.g. #ff6b6b)" }, { status: 400 });
+    }
+
     const tag = await prisma.tag.upsert({
       where: { slug },
-      update: { name }, // keep latest capitalization
-      create: { name, slug },
-      select: { id: true, name: true, slug: true },
+      update: {
+        name,
+        ...(emoji !== undefined && { emoji }),
+        ...(color !== undefined && { color }),
+      },
+      create: { name, slug, emoji, color },
+      select: { id: true, name: true, slug: true, emoji: true, color: true },
     });
 
     return NextResponse.json(tag);

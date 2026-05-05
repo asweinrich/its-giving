@@ -53,7 +53,7 @@ type Category = (typeof CATEGORIES)[number];
 type OrgType = (typeof ORG_TYPES)[number];
 type ImpactScope = (typeof IMPACT_SCOPES)[number];
 
-type Tag = { id: number; name: string; slug: string };
+type Tag = { id: number; name: string; slug: string; emoji?: string; color?: string };
 
 function dateOnlyToNoonUTC(dateOnly: string): string {
   // dateOnly is "YYYY-MM-DD"
@@ -95,6 +95,8 @@ export default function AddOrgForm() {
   const [tagSuggestions, setTagSuggestions] = useState<Tag[]>([]);
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const selectedTagSlugs = useMemo(() => new Set(selectedTags.map((t) => t.slug)), [selectedTags]);
+  const [pendingTagEmoji, setPendingTagEmoji] = useState("");
+  const [pendingTagColor, setPendingTagColor] = useState("#6366f1");
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -174,7 +176,11 @@ export default function AddOrgForm() {
     const resp = await fetch("/api/tag", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: raw }),
+      body: JSON.stringify({
+        name: raw,
+        emoji: pendingTagEmoji.trim() || undefined,
+        color: pendingTagColor || undefined,
+      }),
     });
 
     if (!resp.ok) {
@@ -186,6 +192,8 @@ export default function AddOrgForm() {
     addSelectedTag(tag);
     setTagQuery("");
     setTagSuggestions([]);
+    setPendingTagEmoji("");
+    setPendingTagColor("#6366f1");
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -451,7 +459,7 @@ export default function AddOrgForm() {
 
         {/* Tags */}
         <div className="md:col-span-2">
-          <label className="block text-sm mb-1">Tags</label>
+          <label className="block text-sm mb-1">Tags / Causes</label>
 
           <div className="flex gap-2">
             <input
@@ -469,6 +477,32 @@ export default function AddOrgForm() {
             </button>
           </div>
 
+          {/* Emoji + color picker — only shown when typing a new tag not in suggestions */}
+          {tagQuery.trim() !== "" &&
+            !tagSuggestions.some((t) => t.name.toLowerCase() === tagQuery.trim().toLowerCase()) && (
+            <div className="mt-2 flex items-center gap-3 bg-slate-800 border border-slate-600 rounded p-3">
+              <span className="text-xs text-slate-400 shrink-0">New tag metadata:</span>
+              <input
+                type="text"
+                maxLength={8}
+                placeholder="😀"
+                value={pendingTagEmoji}
+                onChange={(e) => setPendingTagEmoji(e.target.value)}
+                className="w-12 text-center border border-slate-500 rounded p-1 text-lg bg-slate-700 text-white"
+                title="Emoji"
+              />
+              <input
+                type="color"
+                value={pendingTagColor}
+                onChange={(e) => setPendingTagColor(e.target.value)}
+                className="w-10 h-9 rounded border border-slate-500 cursor-pointer bg-slate-700 p-0.5"
+                title="Tag color"
+              />
+              <span className="text-xs text-slate-400">{pendingTagColor}</span>
+            </div>
+          )}
+
+          {/* Suggestions dropdown */}
           {!!tagSuggestions.length && (
             <div className="mt-2 bg-slate-700 rounded border border-slate-600 overflow-hidden">
               {tagSuggestions.slice(0, 8).map((t) => (
@@ -480,29 +514,43 @@ export default function AddOrgForm() {
                     setTagQuery("");
                     setTagSuggestions([]);
                   }}
-                  className="w-full text-left px-3 py-2 hover:bg-slate-600"
+                  className="w-full text-left px-3 py-2 hover:bg-slate-600 flex items-center gap-2"
                 >
-                  {t.name} <span className="text-xs text-slate-300">({t.slug})</span>
+                  {t.emoji && <span>{t.emoji}</span>}
+                  {t.color && (
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: t.color }}
+                    />
+                  )}
+                  <span>{t.name}</span>
+                  <span className="text-xs text-slate-300 ml-auto">({t.slug})</span>
                 </button>
               ))}
               <div className="px-3 py-2 text-xs text-slate-300 border-t border-slate-600">
-                Don’t see it? Click “Add” to create a new tag.
+                Don't see it? Click "Add" to create a new tag.
               </div>
             </div>
           )}
 
+          {/* Selected tag pills */}
           {!!selectedTags.length && (
             <div className="mt-3 flex flex-wrap gap-2">
               {selectedTags.map((t) => (
                 <span
                   key={t.slug}
-                  className="inline-flex items-center gap-2 bg-slate-700 border border-slate-600 px-2 py-1 rounded text-sm"
+                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-sm font-medium"
+                  style={{
+                    backgroundColor: t.color ? `${t.color}33` : '#334155',
+                    border: `1px solid ${t.color ?? '#475569'}`,
+                  }}
                 >
-                  {t.name}
+                  {t.emoji && <span>{t.emoji}</span>}
+                  <span>{t.name}</span>
                   <button
                     type="button"
                     onClick={() => setSelectedTags((prev) => prev.filter((x) => x.slug !== t.slug))}
-                    className="text-slate-300 hover:text-white"
+                    className="text-slate-300 hover:text-white ml-1"
                     aria-label={`Remove ${t.name}`}
                   >
                     ×

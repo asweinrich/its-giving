@@ -170,7 +170,8 @@ model Tag {
   id        Int      @id @default(autoincrement())
   name      String
   slug      String   @unique
-  icon      String?
+  emoji     String?
+  color     String?
   createdAt DateTime @default(now())
 
   organizations Organization[]
