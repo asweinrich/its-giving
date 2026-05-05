@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./styles/custom-tailwind.css";
 import { Inter } from "next/font/google";
-import NavBar from "./components/NavBar";
+import BottomNav from "./components/BottomNav";
 import { AuthProvider } from "@/context/AuthContext";
 import Providers from "./providers";
 
@@ -24,11 +24,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.variable + " font-sans"}>
+      <body className={inter.variable + " font-sans pb-20"}>
         <Providers>
           <AuthProvider>
-            <NavBar />
             {children}
+            <BottomNav />
           </AuthProvider>
         </Providers>
       </body>
