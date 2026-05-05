@@ -173,6 +173,10 @@ export default function AddOrgForm() {
     const raw = tagQuery.trim();
     if (!raw) return;
 
+    console.log("pendingTagEmoji state value:", pendingTagEmoji);  // add this
+    console.log("pendingTagColor state value:", pendingTagColor);
+  
+
     const resp = await fetch("/api/tag", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -488,6 +492,7 @@ export default function AddOrgForm() {
                 placeholder="😀"
                 value={pendingTagEmoji}
                 onChange={(e) => setPendingTagEmoji(e.target.value)}
+                onInput={(e) => setPendingTagEmoji((e.target as HTMLInputElement).value)}
                 className="w-12 text-center border border-slate-500 rounded p-1 text-lg bg-slate-700 text-white"
                 title="Emoji"
               />
@@ -528,7 +533,7 @@ export default function AddOrgForm() {
                 </button>
               ))}
               <div className="px-3 py-2 text-xs text-slate-300 border-t border-slate-600">
-                Don't see it? Click "Add" to create a new tag.
+                Don&#39;t see it? Click &quot;Add&quot; to create a new tag.
               </div>
             </div>
           )}

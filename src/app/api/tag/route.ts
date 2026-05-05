@@ -85,6 +85,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Color must be a valid hex (e.g. #ff6b6b)" }, { status: 400 });
     }
 
+    // In route.ts POST, right before the upsert:
+    console.log("TAG POST body:", { name, slug, emoji, color });
+
+
+   
+
     const tag = await prisma.tag.upsert({
       where: { slug },
       update: {
@@ -95,6 +101,8 @@ export async function POST(req: NextRequest) {
       create: { name, slug, emoji, color },
       select: { id: true, name: true, slug: true, emoji: true, color: true },
     });
+
+     console.log("TAG UPSERT result:", tag);
 
     return NextResponse.json(tag);
   } catch (err) {
