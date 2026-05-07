@@ -34,7 +34,9 @@ const config: Config = {
         darkSlate: '#3A3A3A',
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'], // main font for readability
+        sans: ['Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+        coolvetica: ['Coolvetica', 'sans-serif'],
+        groopa: ['Groopa', 'sans-serif'],
       },
       fontSize: {
         h1: '48px',

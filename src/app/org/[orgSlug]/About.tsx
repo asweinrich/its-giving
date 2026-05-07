@@ -1,9 +1,12 @@
-import { CakeIcon, BuildingOfficeIcon } from "@heroicons/react/24/outline";
-import ImpactChart from "./ImpactChart";
+"use client";
+
+import { useMemo } from "react";
+import {
+  LinkIcon,
+  MapPinIcon,
+} from "@heroicons/react/24/outline";
 import ImpactMap from "./ImpactMap";
 import ServiceAreaMap from "./ServiceAreaMap";
-import AboutText from "./AboutText";
-import { useMemo } from "react";
 
 type AreaType = "NEIGHBORHOOD" | "CITY" | "COUNTY" | "STATE" | "COUNTRY";
 
@@ -14,74 +17,140 @@ interface ServiceArea {
   placeId: string | null;
 }
 
-interface FinancialRecord {
-  year: number;
-  revenue: number;
-  expenses: number;
-}
-
-interface AboutTabProps {
-  category: string | null;
-  subcategory: string | null;
+interface AboutAppProps {
+  mission?: string;
   city?: string;
   state?: string;
   address?: string;
-  rulingDate?: string;
-  financialRecords: FinancialRecord[];
-  orgSlug: string;
+  websiteHref?: string | null;
+  instagramHref?: string | null;
+  tiktokHref?: string | null;
+  instagram?: string | null;
+  tiktok?: string | null;
   serviceAreas?: ServiceArea[];
+  brandColor?: string;
 }
 
-export default function AboutTab({
-  category,
-  subcategory,
+function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+      <rect x="3" y="3" width="18" height="18" rx="5" strokeWidth="1.5" />
+      <circle cx="12" cy="12" r="3.2" strokeWidth="1.5" />
+      <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function TikTokIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
+      <path d="M14 6v6.5a3.5 3.5 0 11-3.5-3.5V6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="17.5" cy="17.5" r="2.2" strokeWidth="1.2" />
+    </svg>
+  );
+}
+
+function socialHandle(raw?: string | null) {
+  if (!raw) return "";
+  const v = raw.trim();
+  if (/^https?:\/\//i.test(v)) {
+    try { return new URL(v).pathname.replace(/^\//, ""); } catch { return v; }
+  }
+  return v.startsWith("@") ? v : `@${v}`;
+}
+
+export default function AboutApp({
   city,
   state,
   address,
-  rulingDate,
-  financialRecords,
-  orgSlug,
+  websiteHref,
+  instagramHref,
+  tiktokHref,
+  instagram,
+  tiktok,
   serviceAreas = [],
-}: AboutTabProps) {
-  const formatRulingDate = (rulingDate: string | undefined) => {
-    if (!rulingDate) return null;
-    const date = new Date(rulingDate);
-    return date.toLocaleString("en-US", { month: "long", year: "numeric" });
-  };
+  brandColor = "#22c55e",
+}: AboutAppProps) {
 
-  const formattedDate = formatRulingDate(rulingDate);
-
-  // Show the HQ pin map only when there are no service areas
   const MemoizedHQMap = useMemo(
     () => (address && serviceAreas.length === 0 ? <ImpactMap address={address} /> : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [address, serviceAreas.length]
   );
 
   return (
-    <div>
-      {category && <p>{category}</p>}
-      {subcategory && <p className="text-sm text-slate-300 mb-2">{subcategory}</p>}
-      {city && state && (
-        <p className="text-slate-300 flex items-center space-x-1 mb-2">
-          <BuildingOfficeIcon className="w-5 h-5 inline me-2 mb-0.5" />
-          Based in <span className="text-slate-100 ml-1">{city}, {state}</span>
-        </p>
-      )}
-      {formattedDate && (
-        <p className="text-slate-300 flex items-center space-x-1">
-          <CakeIcon className="w-5 h-5 inline me-2 mb-0.5" />
-          Established <span className="text-slate-100 ml-1">{formattedDate}</span>
-        </p>
+    <div className="space-y-6">
+
+      {/* Location */}
+      {(city || state) && (
+        <div className="flex items-center gap-2 text-sm text-slate-300">
+          <MapPinIcon className="w-4 h-4 flex-shrink-0" style={{ color: brandColor }} />
+          <span>Based in <span className="text-white font-medium">{[city, state].filter(Boolean).join(", ")}</span></span>
+        </div>
       )}
 
-      {/* Service area map — shown when org has service areas */}
-      {serviceAreas.length > 0 && <ServiceAreaMap serviceAreas={serviceAreas} />}
+      {/* Links */}
+      {(websiteHref || instagramHref || tiktokHref) && (
+        <div className="flex flex-col gap-2">
+          {websiteHref && (
+            <a
+              href={websiteHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors"
+            >
+              <LinkIcon className="w-4 h-4 flex-shrink-0" style={{ color: brandColor }} />
+              <span className="truncate">{websiteHref.replace(/^https?:\/\//, "")}</span>
+            </a>
+          )}
+          {instagramHref && (
+            <a
+              href={instagramHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors"
+            >
+              <InstagramIcon className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate">{socialHandle(instagram)}</span>
+            </a>
+          )}
+          {tiktokHref && (
+            <a
+              href={tiktokHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors"
+            >
+              <TikTokIcon className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate">{socialHandle(tiktok)}</span>
+            </a>
+          )}
+        </div>
+      )}
 
-      {/* HQ pin map — fallback when no service areas defined */}
-      {MemoizedHQMap}
+      {/* Service areas */}
+      {serviceAreas.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Serves</p>
+          <div className="flex flex-wrap gap-1.5">
+            {serviceAreas.map((area) => (
+              <span
+                key={area.id}
+                className="text-xs px-2.5 py-1 rounded-full border border-slate-700 bg-slate-800 text-slate-300"
+              >
+                {area.value}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
-      {financialRecords.length > 0 && <ImpactChart filingsWithData={financialRecords} />}
-      <AboutText orgSlug={orgSlug} />
+      {/* Map — service area map if areas exist, HQ pin map as fallback */}
+      {serviceAreas.length > 0
+        ? <ServiceAreaMap serviceAreas={serviceAreas} />
+        : MemoizedHQMap
+      }
+
     </div>
   );
 }

@@ -6,11 +6,6 @@ import BottomNav from "./components/BottomNav";
 import { AuthProvider } from "@/context/AuthContext";
 import Providers from "./providers";
 
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-inter",
-});
 
 export const metadata: Metadata = {
   title: "It's Giving",
@@ -24,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.variable + " font-sans pb-20"}>
+      <body className="font-sans pb-20">
         <Providers>
           <AuthProvider>
             {children}

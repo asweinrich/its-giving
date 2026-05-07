@@ -1,19 +1,39 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation"; // For accessing [orgSlug] dynamically
-import { LinkIcon } from "@heroicons/react/24/outline";
-import nteeCodes from "../../data/ntee_codes.json"; // Import the NTEE codes JSON
-import AboutTab from "./About";
+import { useParams } from "next/navigation";
+import {
+  LinkIcon,
+  InformationCircleIcon,
+  HeartIcon,
+  HandRaisedIcon,
+  BoltIcon,
+  BookOpenIcon,
+  CalendarDaysIcon,
+  MapPinIcon,
+  UserGroupIcon,
+  EnvelopeIcon,
+} from "@heroicons/react/24/outline";
+import AboutApp from "./About";
 import VerificationBadge from "../../components/VerificationBadge";
+import FitText from '../../components/FitText';
 
-type AreaType = 'NEIGHBORHOOD' | 'CITY' | 'COUNTY' | 'STATE' | 'COUNTRY'
+
+type AreaType = "NEIGHBORHOOD" | "CITY" | "COUNTY" | "STATE" | "COUNTRY";
 
 interface ServiceArea {
-  id: number
-  type: AreaType
-  value: string
-  placeId: string | null
+  id: number;
+  type: AreaType;
+  value: string;
+  placeId: string | null;
+}
+
+interface Tag {
+  id: number;
+  name: string;
+  slug: string;
+  emoji?: string | null;
+  color?: string | null;
 }
 
 interface Organization {
@@ -21,6 +41,8 @@ interface Organization {
   slug?: string;
   type?: string;
   description?: string;
+  brandColor?: string;
+  imageUrl?: string;
   websiteUrl?: string;
   instagram?: string;
   tiktok?: string;
@@ -33,64 +55,45 @@ interface Organization {
   ruling_date?: string;
   regulatoryId?: string;
   regulatoryIdType?: string;
-  verified?: boolean;
+  founded?: string;
 }
 
 interface OrgData {
   organization: Organization;
-  serviceAreas?: ServiceArea[];   // ← add this
-  filings_with_data?: Filing[];
+  serviceAreas?: ServiceArea[];
+  tags?: Tag[];
+  detail?: { mission?: string | null; address?: string | null } | null;
 }
 
-type NteeCodes = {
-  [key: string]: {
-    title: string;
-    subcategories: {
-      [key: string]: string;
-    };
-  };
-};
-
-const nteeCodesTyped: NteeCodes = nteeCodes; // Ensure TypeScript validation
-
-// EIN pattern for validating EIN format (XX-XXXXXXX)
-const EIN_PATTERN = /^\d{2}-\d{7}$/;
-
-type Filing = {
-  tax_prd_yr: number;
-  totrevenue?: number;
-  totfuncexpns?: number;
-  totnetassetsend?: number;
-  totexcessyr?: number;
-};
-
-/**
- * Mapping of backend type values to user-visible labels.
- * Extend these if your backend stores different enum keys.
- */
 const TYPE_LABELS: Record<string, string> = {
   NONPROFIT: "Nonprofit",
   FOUNDATION: "Foundation",
-  GRASSROOTS: "Grassroots Effort",
+  GRASSROOTS: "Grassroots",
   GOVERNMENTAL: "Governmental",
   FAITH_BASED: "Faith-based",
   PTA: "PTA",
-  BUSINESS: "Business",
-  OTHER: "Organization",
 };
 
-
-/** Derive a human label for given type key */
-function getTypeLabel(type?: string | null) {
-  if (!type) return TYPE_LABELS.OTHER;
-  return TYPE_LABELS[type] ?? type;
+function normalizeSocialUrl(platform: "instagram" | "tiktok", value?: string | null) {
+  if (!value) return null;
+  const v = value.trim();
+  if (/^https?:\/\//i.test(v)) return v;
+  const handle = v.replace(/^@/, "");
+  return platform === "instagram"
+    ? `https://instagram.com/${encodeURIComponent(handle)}`
+    : `https://www.tiktok.com/@${encodeURIComponent(handle)}`;
 }
 
+function socialHandle(raw?: string | null) {
+  if (!raw) return "";
+  const v = raw.trim();
+  if (/^https?:\/\//i.test(v)) {
+    try { return new URL(v).pathname.replace(/^\//, ""); } catch { return v; }
+  }
+  return v.startsWith("@") ? v : `@${v}`;
+}
 
-/**
- * Small inline Instagram icon resembling Heroicons outline style.
- */
-function InstagramIcon({ className = "w-4 h-4 inline me-2" }: { className?: string }) {
+function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
       <rect x="3" y="3" width="18" height="18" rx="5" strokeWidth="1.5" />
@@ -100,11 +103,7 @@ function InstagramIcon({ className = "w-4 h-4 inline me-2" }: { className?: stri
   );
 }
 
-/**
- * Small inline TikTok-like icon (simplified) matching heroicons outline feel.
- * Note: not the official logo, just a simple glyph for UI affordance.
- */
-function TikTokIcon({ className = "w-4 h-4 inline me-2 mb-0.5" }: { className?: string }) {
+function TikTokIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
       <path d="M14 6v6.5a3.5 3.5 0 11-3.5-3.5V6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -113,72 +112,41 @@ function TikTokIcon({ className = "w-4 h-4 inline me-2 mb-0.5" }: { className?: 
   );
 }
 
-/** Normalize social input to a usable absolute URL for Instagram and TikTok.
- * - If the value already looks like a URL (starts with http), return as-is.
- * - If it starts with '@', remove it and build a profile URL.
- * - Otherwise treat as handle and build a profile URL.
- */
-function normalizeSocialUrl(platform: "instagram" | "tiktok", value?: string | null) {
-  if (!value) return null;
-  const v = value.trim();
-  if (!v) return null;
-  if (/^https?:\/\//i.test(v)) return v;
-  // remove leading @ if present
-  const handle = v.replace(/^@/, "");
-  if (platform === "instagram") {
-    return `https://instagram.com/${encodeURIComponent(handle)}`;
-  }
-  // platform === "tiktok"
-  return `https://www.tiktok.com/@${encodeURIComponent(handle)}`;
-}
+// All possible apps — base ones always shown, extras greyed unless set up
+const BASE_APPS = [
+  { key: "about", label: "About", icon: InformationCircleIcon },
+  { key: "fundraisers", label: "Fundraisers", icon: HeartIcon },
+  { key: "support", label: "Support", icon: HandRaisedIcon },
+  { key: "activity", label: "Activity", icon: BoltIcon },
+];
 
-/** Pick a friendly display for social link: prefer showing handle when possible */
-function socialDisplayText(raw?: string | null) {
-  if (!raw) return "";
-  const v = raw.trim();
-  if (!v) return "";
-  if (/^https?:\/\//i.test(v)) {
-    try {
-      const url = new URL(v);
-      // show path portion when possible (e.g., instagram.com/handle)
-      return url.pathname.replace(/^\//, "") || url.host;
-    } catch {
-      return v;
-    }
-  }
-  return v.startsWith("@") ? v : `@${v}`;
-}
+const EXTRA_APPS = [
+  { key: "resources", label: "Resources", icon: BookOpenIcon },
+  { key: "events", label: "Events", icon: CalendarDaysIcon },
+  { key: "locations", label: "Locations", icon: MapPinIcon },
+  { key: "volunteer", label: "Volunteer", icon: UserGroupIcon },
+  { key: "newsletter", label: "Newsletter", icon: EnvelopeIcon },
+];
+
+// For now nothing is "set up" except About — expand this as features get built
+const ACTIVE_APPS = new Set(["about"]);
 
 export default function OrgPage() {
-  const { orgSlug } = useParams(); // Extract slug from URL
-  const [orgData, setOrgData] = useState<OrgData | null>(null); // Store org data
-  const [loading, setLoading] = useState(true); // Track loading state
+  const { orgSlug } = useParams();
+  const [orgData, setOrgData] = useState<OrgData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("about"); // Track active tab
+  const [activeApp, setActiveApp] = useState("about");
 
-  // Normalize slug parameter (can be array or string)
   const normalizedSlug = Array.isArray(orgSlug) ? orgSlug[0] : orgSlug;
 
   useEffect(() => {
-    // Fetch organization data from API
     const fetchOrgData = async () => {
       try {
         setLoading(true);
-        // Support both slug-based and legacy EIN-based lookups
-        const slug = normalizedSlug;
-
-        // Try slug-based lookup first
-        let response = await fetch(`/api/org/${slug}`);
-
-        // If not found and slug looks like an EIN, try ProPublica API as fallback
-        if (!response.ok && slug && EIN_PATTERN.test(slug)) {
-          response = await fetch(`/api/org/propublica?ein=${slug}`);
-        }
-
-        if (!response.ok) {
-          throw new Error(`Error fetching data: ${response.statusText}`);
-        }
-        const data: OrgData = await response.json(); // Explicitly type the response
+        const response = await fetch(`/api/org/${normalizedSlug}`);
+        if (!response.ok) throw new Error(`Error: ${response.statusText}`);
+        const data: OrgData = await response.json();
         setOrgData(data);
       } catch (err) {
         console.error(err);
@@ -187,257 +155,242 @@ export default function OrgPage() {
         setLoading(false);
       }
     };
+    if (orgSlug) fetchOrgData();
+  }, [orgSlug, normalizedSlug]);
 
-    if (orgSlug) fetchOrgData(); // Trigger fetch when slug is available
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orgSlug]); // normalizedSlug is derived from orgSlug, so only orgSlug is needed
+  if (loading) return (
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="text-slate-400 text-sm">Loading…</div>
+    </div>
+  );
 
-  if (loading) {
-    return <div className="text-center text-white">Loading organization data...</div>;
-  }
+  if (error || !orgData?.organization) return (
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="text-red-400 text-sm">{error ?? "Organization not found."}</div>
+    </div>
+  );
 
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
-  }
+  const org = orgData.organization;
+  const serviceAreas = orgData.serviceAreas ?? [];
+  const tags = orgData.tags ?? [];
 
-  if (!orgData?.organization) {
-    return <div className="text-center text-white">No data available for this organization.</div>;
-  }
+  const brandColor = org.brandColor ?? "#22c55e";
+  const typeLabel = TYPE_LABELS[org.type ?? ""] ?? org.type ?? "";
+  const mission = org.mission ?? orgData.detail?.mission ?? org.description ?? "";
+  const address = org.address ?? orgData.detail?.address ?? "";
+  const fullAddress = [address, org.city, org.state, org.zipcode].filter(Boolean).join(", ");
 
-  const {
-    name,
-    slug,
-    type,
-    description,
-    mission,
-    websiteUrl,
-    instagram,
-    tiktok,
-    city,
-    state,
-    ntee_code,
-    ruling_date,
-    zipcode,
-    address,
-  } = orgData.organization;
-  const fullAddress = [address, city, state, zipcode].filter(Boolean).join(", ");
+  const websiteHref = org.websiteUrl?.trim() || null;
+  const instagramHref = normalizeSocialUrl("instagram", org.instagram);
+  const tiktokHref = normalizeSocialUrl("tiktok", org.tiktok);
 
-  const getNteeDetails = (code: string | undefined) => {
-    if (!code || code.length === 0) return { category: null, subcategory: null };
+  const orgInitials = org.name
+    .split(/\s+/).slice(0, 2).map((s) => s[0]).join("").toUpperCase();
 
-    const generalCategoryKey = code[0]; // First letter of the NTEE code
-    const generalCategory = nteeCodesTyped[generalCategoryKey] || { title: "Unknown", subcategories: {} };
-    const subcategory = generalCategory.subcategories[code] || "Unknown";
+  // Founded year only
+  const foundedYear = org.founded
+    ? new Date(org.founded).getFullYear()
+    : org.ruling_date
+    ? new Date(org.ruling_date).getFullYear()
+    : null;
 
-    return {
-      category: generalCategory.title,
-      subcategory: subcategory,
-    };
-  };
-  const { category, subcategory } = getNteeDetails(ntee_code);
-
-  // Use mission from organization data if available, otherwise fall back to description
-  const displayMission = mission || description;
-
-  const processFinancialData = (filingsWithData: Filing[]) => {
-    if (!Array.isArray(filingsWithData) || filingsWithData.length === 0) {
-      return [];
-    }
-
-    return filingsWithData
-      .filter((filing) => filing.tax_prd_yr && filing.totrevenue !== undefined) // Ensure required fields exist
-      .map((filing) => ({
-        year: filing.tax_prd_yr,
-        revenue: (filing.totrevenue || 0) / 100, // Adjust revenue
-        expenses: (filing.totfuncexpns || 0) / 100, // Adjust expenses
-        netAssets: (filing.totnetassetsend || 0) / 100, // Adjust net assets
-        profit: (filing.totexcessyr || 0) / 100, // Adjust profit
-      }))
-      .sort((a, b) => a.year - b.year); // Sort in ascending order of year
-  };
-  const filingsWithData = orgData?.filings_with_data || [];
-  const financialRecords = processFinancialData(filingsWithData);
-
-  // derive label + color for type display
-  const typeLabel = getTypeLabel(type);
-
-  const websiteHref = websiteUrl && websiteUrl.trim() ? websiteUrl.trim() : null;
-  const instagramHref = normalizeSocialUrl("instagram", instagram);
-  const tiktokHref = normalizeSocialUrl("tiktok", tiktok);
-
-  const serviceAreas = orgData?.serviceAreas ?? [];
+  const allApps = [...BASE_APPS, ...EXTRA_APPS];
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white max-w-5xl mx-auto rounded-2xl mt-6 overflow-hidden">
-      {/* Header Section */}
-      <div className="relative">
-        {/* Cover Photo */}
-        <div className="h-40 md:h-60 bg-gradient-to-tr from-green-500 to-green-800"></div>
-        {/* Profile Details */}
-        <div className="absolute -bottom-14 left-3 md:left-5 flex items-start space-x-4">
-          <div className="w-24 h-24 bg-slate-700 rounded-lg border-4 border-slate-900"></div>
+    <div className="min-h-screen bg-slate-950 text-white">
+
+      {/* ── BILLBOARD HEADER ── */}
+      <div
+        className="relative w-full overflow-hidden"
+        style={{
+          background: `linear-gradient(135deg, ${brandColor}ee 0%, ${brandColor}88 50%, #0f172a 100%)`,
+          minHeight: "260px",
+        }}
+      >
+        {/* Big color blob for depth */}
+        <div
+          className="absolute -top-20 -right-20 w-80 h-80 rounded-full blur-3xl opacity-40 pointer-events-none"
+          style={{ backgroundColor: brandColor }}
+        />
+
+        <div className="relative p-5 flex flex-col min-h-[260px]">
+          <div className="flex items-around">
+            {/* Avatar */}
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-xl mb-4 shadow-lg border-2 border-white/20"
+              style={{ backgroundColor: `${brandColor}cc` }}
+            >
+              {orgInitials}
+            </div>
+            {/* Type + verified badge */}
+            <div className="flex flex-col items-center gap-2 ms-auto">
+              {typeLabel && (
+                <span
+                  className="flex py-1 text-sm font-semibold px-2 rounded-lg border border-white/20 text-white/80"
+                  style={{ backgroundColor: `${brandColor}44` }}
+                >
+                  <VerificationBadge orgSlug={org.slug || normalizedSlug || ""} /> &nbsp;{typeLabel}
+                </span>
+              )}
+              
+              {foundedYear && (
+                <span className="ms-auto me-2 text-xs text-white/70">est. {foundedYear}</span>
+              )}
+            </div>
+          </div>
+
+
+          {/* Org name — big billboard style */}
+          <FitText
+            text={org.name}
+            fontFamily="Groopa, sans-serif"
+            fontWeight="400"
+            color="white"
+            className="me-0 -ms-1 text-shadow-lg text-center mx-0"
+          />
+
+          
+        </div>
+        {mission && (
+          <div className="px-6 pb-4 mb-4">
+            <p className="text-slate-200 text-sm font-italic max-w-2xl">{mission}</p>
+          </div>
+        )}
+      </div>
+
+      {/* ── MISSION STRIP ── */}
+      
+
+      {/* ── TAGS ── */}
+      {tags.length > 0 && (
+        <div className="px-5 py-3 flex flex-wrap gap-2 border-b border-slate-800">
+          {tags.map((tag) => (
+            <span
+              key={tag.id}
+              className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border font-medium"
+              style={{
+                backgroundColor: tag.color ? `${tag.color}22` : "#1e293b",
+                borderColor: tag.color ?? "#475569",
+                color: tag.color ?? "#94a3b8",
+              }}
+            >
+              {tag.emoji && <span>{tag.emoji}</span>}
+              {tag.name}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* ── GIVE + ACTION CALLS ── */}
+      <div className="px-5 py-5 border-b border-slate-800">
+        <button
+          className="w-full py-3.5 rounded-2xl text-white font-bold text-lg shadow-lg active:scale-95 transition-transform"
+          style={{ backgroundColor: brandColor }}
+        >
+          Give
+        </button>
+        <div className="grid grid-cols-2 gap-2 mt-3">
+          <button className="py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm font-medium text-slate-200 hover:border-slate-500 transition-all">
+            Volunteer
+          </button>
+          <button className="py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm font-medium text-slate-200 hover:border-slate-500 transition-all">
+            Share
+          </button>
         </div>
       </div>
 
-      {/* Tabs Section */}
-      <div className="mt-16 px-2 md:px-4">
-        <div className="flex-col items-center">
-          <h1 className="text-xl md:text-2xl font-semibold inline leading-tight px-2 flex items-center">
-            {name}
-          </h1>
-          <span className="flex items-center px-1.5 mt-1 mb-2">
-            <VerificationBadge orgSlug={slug || normalizedSlug || ""} />
-            <span className="ml-1 font-light opacity-70">
-              {typeLabel}
-            </span>
-          </span>
+      {/* ── APPS ROW ── */}
+      <div className="px-5 py-4 border-b border-slate-800">
+        <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+          {allApps.map(({ key, label, icon: Icon }) => {
+            const isActive = activeApp === key;
+            const isEnabled = ACTIVE_APPS.has(key);
+            return (
+              <button
+                key={key}
+                onClick={() => isEnabled && setActiveApp(key)}
+                disabled={!isEnabled}
+                className={`flex-shrink-0 flex flex-col items-center gap-1.5 w-16 pt-3 pb-2.5 rounded-2xl border transition-all ${
+                  isActive
+                    ? "border-2 shadow-lg"
+                    : isEnabled
+                    ? "bg-slate-800 border-slate-700 hover:border-slate-500"
+                    : "bg-slate-900 border-slate-800 opacity-40 cursor-not-allowed"
+                }`}
+                style={isActive ? {
+                  backgroundColor: `${brandColor}22`,
+                  borderColor: brandColor,
+                } : {}}
+              >
+                <Icon
+                  className="w-6 h-6"
+                  style={{ color: isActive ? brandColor : isEnabled ? "#94a3b8" : "#475569" }}
+                />
+                <span
+                  className="text-[10px] font-medium leading-none"
+                  style={{ color: isActive ? brandColor : isEnabled ? "#cbd5e1" : "#475569" }}
+                >
+                  {label}
+                </span>
+              </button>
+            );
+          })}
         </div>
+      </div>
 
-        
+      {/* ── APP CONTENT ── */}
+      <div className="px-5 py-5">
 
-        {displayMission && (
-          <p className="mb-3 mt-1 px-2 font-light md:text-lg max-w-4xl">{displayMission}</p>
+        {activeApp === "about" && (
+          <AboutApp
+            mission={mission}
+            city={org.city}
+            state={org.state}
+            address={fullAddress}
+            websiteHref={websiteHref}
+            instagramHref={instagramHref}
+            tiktokHref={tiktokHref}
+            instagram={org.instagram}
+            tiktok={org.tiktok}
+            serviceAreas={serviceAreas}
+            brandColor={brandColor}
+          />
         )}
 
-        {/* Links: website, instagram, tiktok (display only if present; in this order) */}
-        <div className="mb-3 mt-2 px-2 flex flex-col gap-0.5">
-          {websiteHref && (
-            <p className="text-slate-300">
-              <a
-                href={websiteHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="opacity-100 hover:opacity-80 inline-flex items-center"
-              >
-                <LinkIcon className="w-4 h-4 inline me-2 mb-0.5" />
-                <span className="truncate max-w-xl">{websiteHref}</span>
-              </a>
-            </p>
-          )}
-
-          {instagramHref && (
-            <p className="text-slate-400">
-              <a
-                href={instagramHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="opacity-100 hover:opacity-80 flex items-center"
-              >
-                <InstagramIcon />
-                <span className="truncate max-w-xl">{socialDisplayText(instagram)}</span>
-              </a>
-            </p>
-          )}
-
-          {tiktokHref && (
-            <p className="text-slate-400">
-              <a
-                href={tiktokHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="opacity-100 hover:opacity-80 inline-flex items-center"
-              >
-                <TikTokIcon />
-                <span className="truncate max-w-xl">{socialDisplayText(tiktok)}</span>
-              </a>
-            </p>
-          )}
-        </div>
-
-        {/* Service Areas */}
-        {serviceAreas.length > 0 && (
-          <div className="mb-4 mt-1 px-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">
-              Serves
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              {serviceAreas.map((area) => (
-                <span
-                  key={area.id}
-                  className="inline-block rounded-full bg-slate-800 border border-slate-700 px-3 py-0.5 text-sm text-slate-300"
-                >
-                  {area.value}
-                </span>
-              ))}
-            </div>
+        {activeApp === "fundraisers" && (
+          <div className="text-center py-12 text-slate-500">
+            <HeartIcon className="w-10 h-10 mx-auto mb-3 opacity-40" />
+            <p className="text-sm">No fundraisers yet.</p>
           </div>
         )}
 
-        <div className="flex justify-start border-b border-slate-700 overflow-x-scroll scrollbar-hide">
-          <button
-            className={`py-2 px-4 ${
-              activeTab === "about" ? "border-b-2 border-green-500 text-green-500" : "border-b-2 border-slate-700 text-slate-400"
-            }`}
-            onClick={() => setActiveTab("about")}
-          >
-            About
-          </button>
-          <button
-            className={`py-2 px-4 ${
-              activeTab === "resources" ? "border-b-2 border-green-500 text-green-500" : "border-b-2 border-slate-700 text-slate-400"
-            }`}
-            onClick={() => setActiveTab("resources")}
-          >
-            Resources
-          </button>
-          <button
-            className={`py-2 px-4 ${
-              activeTab === "activity" ? "border-b-2 border-green-500 text-green-500" : "border-b-2 border-slate-700 text-slate-400"
-            }`}
-            onClick={() => setActiveTab("activity")}
-          >
-            Activity
-          </button>
-          <button
-            className={`py-2 px-4 ${
-              activeTab === "fundraisers" ? "border-b-2 border-green-500 text-green-500" : "border-b-2 border-slate-700 text-slate-400"
-            }`}
-            onClick={() => setActiveTab("fundraisers")}
-          >
-            Fundraisers
-          </button>
-          <button
-            className={`py-2 px-4 ${
-              activeTab === "support" ? "border-b-2 border-green-500 text-green-500" : "border-b-2 border-slate-700 text-slate-400"
-            }`}
-            onClick={() => setActiveTab("support")}
-          >
-            Support
-          </button>
-        </div>
+        {activeApp === "support" && (
+          <div className="text-center py-12 text-slate-500">
+            <HandRaisedIcon className="w-10 h-10 mx-auto mb-3 opacity-40" />
+            <p className="text-sm">Support options coming soon.</p>
+          </div>
+        )}
 
-        {/* Tab Content */}
-        <div className="mt-4 px-2">
-          {activeTab === "about" && (
-            <AboutTab
-              category={category}
-              subcategory={subcategory}
-              city={city}
-              state={state}
-              address={fullAddress}
-              rulingDate={ruling_date}
-              financialRecords={financialRecords}
-              orgSlug={slug || normalizedSlug || ""}
-              serviceAreas={serviceAreas}   // ← add this
-            />
+        {activeApp === "activity" && (
+          <div className="text-center py-12 text-slate-500">
+            <BoltIcon className="w-10 h-10 mx-auto mb-3 opacity-40" />
+            <p className="text-sm">No recent activity.</p>
+          </div>
+        )}
+
+      </div>
+
+      {/* ── FOOTER DISCLAIMER ── */}
+      <div className="px-5 pb-6 pt-2 border-t border-slate-800 mt-4">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+          {org.regulatoryId && (
+            <span>{org.regulatoryIdType ?? "ID"}: {org.regulatoryId}</span>
           )}
-
-          {activeTab === "resources" && (
-            <div className="bg-slate-800 rounded p-4">
-              <h2 className="text-lg font-semibold mb-2">Resources</h2>
-              <p className="text-slate-300">Resources content coming soon — this tab will show how to receive help from this organization.</p>
-            </div>
-          )}
-
-          {activeTab === "support" && (
-            <div className="bg-slate-800 rounded p-4">
-              <h2 className="text-lg font-semibold mb-2">Support</h2>
-              <p className="text-slate-300">Support options coming soon — people will be able to donate, volunteer, or otherwise support this organization here.</p>
-            </div>
-          )}
-
+          {org.ntee_code && <span>NTEE: {org.ntee_code}</span>}
+          {typeLabel && <span>{typeLabel}</span>}
         </div>
       </div>
+
     </div>
   );
 }
