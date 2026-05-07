@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./styles/custom-tailwind.css";
-import { Inter } from "next/font/google";
 import BottomNav from "./components/BottomNav";
 import { AuthProvider } from "@/context/AuthContext";
 import Providers from "./providers";

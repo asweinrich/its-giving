@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
-  LinkIcon,
   InformationCircleIcon,
   HeartIcon,
   HandRaisedIcon,
@@ -84,33 +83,6 @@ function normalizeSocialUrl(platform: "instagram" | "tiktok", value?: string | n
     : `https://www.tiktok.com/@${encodeURIComponent(handle)}`;
 }
 
-function socialHandle(raw?: string | null) {
-  if (!raw) return "";
-  const v = raw.trim();
-  if (/^https?:\/\//i.test(v)) {
-    try { return new URL(v).pathname.replace(/^\//, ""); } catch { return v; }
-  }
-  return v.startsWith("@") ? v : `@${v}`;
-}
-
-function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
-      <rect x="3" y="3" width="18" height="18" rx="5" strokeWidth="1.5" />
-      <circle cx="12" cy="12" r="3.2" strokeWidth="1.5" />
-      <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
-function TikTokIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
-      <path d="M14 6v6.5a3.5 3.5 0 11-3.5-3.5V6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="17.5" cy="17.5" r="2.2" strokeWidth="1.2" />
-    </svg>
-  );
-}
 
 // All possible apps — base ones always shown, extras greyed unless set up
 const BASE_APPS = [
