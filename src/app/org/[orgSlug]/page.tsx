@@ -192,7 +192,7 @@ export default function OrgPage() {
               name={org.name}
               imageUrl={org.imageUrl}
               brandColor={brandColor}
-              className="w-36 h-36 rounded-xl mb-4 p-1.5"
+              className="w-36 h-36 rounded-xl mb-6 p-1.5"
               textClassName="text-xl font-bold"
             />
             {/* Type + verified badge */}
@@ -257,7 +257,7 @@ export default function OrgPage() {
       {/* ── GIVE + ACTION CALLS ── */}
       <div className="px-5 py-5 border-b border-slate-800">
         <button
-          className="w-full py-2 rounded-lg text-white text-shadow font-semidbold tracking-wide text-xl shadow-lg active:scale-95 transition-transform"
+          className="w-full py-2 rounded-lg text-white text-shadow font-bold tracking-wide text-xl shadow-lg active:scale-95 transition-transform"
           style={{ backgroundColor: brandColor }}
         >
           Give
