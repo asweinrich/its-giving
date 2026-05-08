@@ -16,6 +16,8 @@ import {
 import AboutApp from "./About";
 import VerificationBadge from "../../components/VerificationBadge";
 import FitText from '../../components/FitText';
+import OrgAvatar from '../../components/OrgAvatar';
+
 
 
 type AreaType = "NEIGHBORHOOD" | "CITY" | "COUNTY" | "STATE" | "COUNTRY";
@@ -188,12 +190,14 @@ export default function OrgPage() {
         <div className="relative p-5 flex flex-col min-h-[260px]">
           <div className="flex items-around">
             {/* Avatar */}
-            <div
-              className="w-36 h-36 rounded-2xl flex items-center justify-center text-white font-bold text-xl mb-4 shadow-lg border-2 border-white/20"
-              style={{ backgroundColor: `${brandColor}cc` }}
-            >
-              {orgInitials}
-            </div>
+            <OrgAvatar
+              name={org.name}
+              imageUrl={org.imageUrl}
+              brandColor={brandColor}
+              className="w-36 h-36 rounded-xl mb-4 p-1.5"
+              style={{ backgroundColor: `${brandColor}` }}
+              textClassName="text-xl font-bold"
+            />
             {/* Type + verified badge */}
             <div className="flex flex-col items-center gap-2 ms-auto">
               {typeLabel && (
@@ -256,7 +260,7 @@ export default function OrgPage() {
       {/* ── GIVE + ACTION CALLS ── */}
       <div className="px-5 py-5 border-b border-slate-800">
         <button
-          className="w-full py-2 rounded-lg text-white text-shadow text-semibold tracking-wide text-lg shadow-lg active:scale-95 transition-transform"
+          className="w-full py-2 rounded-lg text-white text-shadow font-semidbold tracking-wide text-xl shadow-lg active:scale-95 transition-transform"
           style={{ backgroundColor: brandColor }}
         >
           Give
