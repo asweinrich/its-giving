@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import {
-  LinkIcon,
   MapPinIcon,
 } from "@heroicons/react/24/outline";
 import ImpactMap from "./ImpactMap";
@@ -31,43 +30,11 @@ interface AboutAppProps {
   brandColor?: string;
 }
 
-function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
-      <rect x="3" y="3" width="18" height="18" rx="5" strokeWidth="1.5" />
-      <circle cx="12" cy="12" r="3.2" strokeWidth="1.5" />
-      <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
-function TikTokIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden>
-      <path d="M14 6v6.5a3.5 3.5 0 11-3.5-3.5V6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="17.5" cy="17.5" r="2.2" strokeWidth="1.2" />
-    </svg>
-  );
-}
-
-function socialHandle(raw?: string | null) {
-  if (!raw) return "";
-  const v = raw.trim();
-  if (/^https?:\/\//i.test(v)) {
-    try { return new URL(v).pathname.replace(/^\//, ""); } catch { return v; }
-  }
-  return v.startsWith("@") ? v : `@${v}`;
-}
 
 export default function AboutApp({
   city,
   state,
   address,
-  websiteHref,
-  instagramHref,
-  tiktokHref,
-  instagram,
-  tiktok,
   serviceAreas = [],
   brandColor = "#22c55e",
 }: AboutAppProps) {
