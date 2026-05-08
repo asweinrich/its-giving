@@ -189,7 +189,7 @@ export default function OrgPage() {
           <div className="flex items-around">
             {/* Avatar */}
             <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-xl mb-4 shadow-lg border-2 border-white/20"
+              className="w-36 h-36 rounded-2xl flex items-center justify-center text-white font-bold text-xl mb-4 shadow-lg border-2 border-white/20"
               style={{ backgroundColor: `${brandColor}cc` }}
             >
               {orgInitials}
@@ -206,7 +206,7 @@ export default function OrgPage() {
               )}
               
               {foundedYear && (
-                <span className="ms-auto me-2 text-xs text-white/70">est. {foundedYear}</span>
+                <span className="ms-auto me-2 text-sm text-white/70">est. {foundedYear}</span>
               )}
             </div>
           </div>
@@ -225,7 +225,7 @@ export default function OrgPage() {
         </div>
         {mission && (
           <div className="px-6 pb-4 mb-4">
-            <p className="text-slate-200 text-sm font-italic max-w-2xl">{mission}</p>
+            <p className="text-slate-200 font-italic max-w-2xl">{mission}</p>
           </div>
         )}
       </div>
@@ -239,14 +239,14 @@ export default function OrgPage() {
           {tags.map((tag) => (
             <span
               key={tag.id}
-              className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border font-medium"
+              className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full border font-medium"
               style={{
                 backgroundColor: tag.color ? `${tag.color}22` : "#1e293b",
                 borderColor: tag.color ?? "#475569",
                 color: tag.color ?? "#94a3b8",
               }}
             >
-              {tag.emoji && <span>{tag.emoji}</span>}
+              {tag.emoji && <span className="text-sm">{tag.emoji}</span>}
               {tag.name}
             </span>
           ))}
@@ -256,7 +256,7 @@ export default function OrgPage() {
       {/* ── GIVE + ACTION CALLS ── */}
       <div className="px-5 py-5 border-b border-slate-800">
         <button
-          className="w-full py-3.5 rounded-2xl text-white font-bold text-lg shadow-lg active:scale-95 transition-transform"
+          className="w-full py-2 rounded-lg text-white text-shadow text-semibold tracking-wide text-lg shadow-lg active:scale-95 transition-transform"
           style={{ backgroundColor: brandColor }}
         >
           Give
