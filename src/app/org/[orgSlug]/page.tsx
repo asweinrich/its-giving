@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   InformationCircleIcon,
+  LinkIcon,
   HeartIcon,
   HandRaisedIcon,
   BoltIcon,
@@ -105,6 +106,33 @@ const EXTRA_APPS = [
 // For now nothing is "set up" except About — expand this as features get built
 const ACTIVE_APPS = new Set(["about"]);
 
+function InstagramIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zm0 10.162a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z" />
+    </svg>
+  );
+}
+
+function TikTokIcon({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z" />
+    </svg>
+  );
+}
+
+function socialHandle(raw?: string | null): { prefix: string; handle: string } {
+  if (!raw) return { prefix: '@', handle: '' };
+  const v = raw.trim();
+  let handle = v;
+  if (/^https?:\/\//i.test(v)) {
+    try { handle = new URL(v).pathname.replace(/^\//, ''); } catch { handle = v; }
+  }
+  handle = handle.replace(/^@/, '');
+  return { prefix: '@', handle };
+}
+
 export default function OrgPage() {
   const { orgSlug } = useParams();
   const [orgData, setOrgData] = useState<OrgData | null>(null);
@@ -167,6 +195,7 @@ export default function OrgPage() {
     : null;
 
   const allApps = [...BASE_APPS, ...EXTRA_APPS];
+
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -236,15 +265,15 @@ export default function OrgPage() {
 
       {/* ── TAGS ── */}
       {tags.length > 0 && (
-        <div className="px-5 py-3 flex flex-wrap gap-2 border-b border-slate-800">
+        <div className="px-5 pt-5 pb-4 flex flex-wrap gap-2 border-b border-slate-800">
           {tags.map((tag) => (
             <span
               key={tag.id}
-              className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-full border font-medium"
+              className="inline-flex items-center gap-1 mb-1 text-sm px-3 py-1.5 rounded-full border font-medium"
               style={{
-                backgroundColor: tag.color ? `${tag.color}22` : "#1e293b",
+                backgroundColor: tag.color ? `${tag.color}50` : "#1e293b",
                 borderColor: tag.color ?? "#475569",
-                color: tag.color ?? "#94a3b8",
+                color: "#eeeeee",
               }}
             >
               {tag.emoji && <span className="text-sm">{tag.emoji}</span>}
@@ -253,6 +282,8 @@ export default function OrgPage() {
           ))}
         </div>
       )}
+
+      
 
       {/* ── GIVE + ACTION CALLS ── */}
       <div className="px-5 py-5 border-b border-slate-800">
@@ -271,6 +302,46 @@ export default function OrgPage() {
           </button>
         </div>
       </div>
+
+      {/* Links */}
+      {(websiteHref || instagramHref || tiktokHref) && (
+        <div className="flex flex-col gap-2 p-5 border-b border-slate-800">
+          {websiteHref && (
+            <a
+              href={websiteHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors"
+            >
+              <LinkIcon className="w-5 h-5 flex-shrink-0" style={{ color: brandColor }} />
+              <span className="truncate">{websiteHref.replace(/^https?:\/\//, "")}</span>
+            </a>
+          )}
+          {instagramHref && (
+            <a
+              href={instagramHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-slate-300 hover:text-white transition-colors"
+            >
+              <InstagramIcon className="w-5 h-5 me-1" />
+              <span className="text-slate-500">@</span><span>{socialHandle(org.instagram).handle}</span>
+            </a>
+          )}
+
+          {tiktokHref && (
+            <a
+              href={tiktokHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-slate-300 hover:text-white transition-colors"
+            >
+              <TikTokIcon className="w-5 h-5 me-1" />
+              <span className="text-slate-500">@</span><span>{socialHandle(org.tiktok).handle}</span>
+            </a>
+          )}
+        </div>
+      )}
 
       {/* ── APPS ROW ── */}
       <div className="px-5 py-4 border-b border-slate-800">
