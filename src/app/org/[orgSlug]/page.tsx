@@ -158,8 +158,6 @@ export default function OrgPage() {
   const instagramHref = normalizeSocialUrl("instagram", org.instagram);
   const tiktokHref = normalizeSocialUrl("tiktok", org.tiktok);
 
-  const orgInitials = org.name
-    .split(/\s+/).slice(0, 2).map((s) => s[0]).join("").toUpperCase();
 
   // Founded year only
   const foundedYear = org.founded
