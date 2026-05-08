@@ -25,12 +25,16 @@ export default function OrgAvatar({
 
   if (imageUrl && !imgError) {
     return (
-      <div className={`${className} overflow-hidden border-4 border-white/20 shadow-lg flex-shrink-0`}>
+      <div 
+        style={{ backgroundColor: `${brandColor}` }}
+        className={`${className} overflow-hidden border-4 border-white/20 shadow-lg flex-shrink-0`}
+      >
         <img
           src={imageUrl}
           alt={`${name} logo`}
           className="w-full h-full object-contain bg-white rounded px-2"
           onError={() => setImgError(true)}
+
         />
       </div>
     );

@@ -193,7 +193,6 @@ export default function OrgPage() {
               imageUrl={org.imageUrl}
               brandColor={brandColor}
               className="w-36 h-36 rounded-xl mb-4 p-1.5"
-              style={{ backgroundColor: `${brandColor}` }}
               textClassName="text-xl font-bold"
             />
             {/* Type + verified badge */}
